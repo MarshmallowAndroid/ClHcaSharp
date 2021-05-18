@@ -20,10 +20,13 @@ namespace ClHcaSharp
             {
                 case 0:
                     return Init0();
+
                 case 1:
                     return Init1();
+
                 case 56:
                     return Init56(keyCode);
+
                 default:
                     throw new ArgumentException("Invalid cipher type.");
             }

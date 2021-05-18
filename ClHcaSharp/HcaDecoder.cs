@@ -108,7 +108,7 @@ namespace ClHcaSharp
             }
         }
 
-        static void UnpackScaleFactors(Channel channel, BitReader bitReader, uint hfrGroupCount, uint version)
+        private static void UnpackScaleFactors(Channel channel, BitReader bitReader, uint hfrGroupCount, uint version)
         {
             uint csCount = channel.CodedCount;
             uint extraCount;
@@ -170,7 +170,7 @@ namespace ClHcaSharp
             }
         }
 
-        static void UnpackIntensity(Channel channel, BitReader bitReader, uint version)
+        private static void UnpackIntensity(Channel channel, BitReader bitReader, uint version)
         {
             if (channel.Type == ChannelType.StereoSecondary)
             {
@@ -240,7 +240,7 @@ namespace ClHcaSharp
             }
         }
 
-        static void CalculateResolution(Channel channel, uint packedNoiseLevel, byte[] athCurve, uint minResolution,
+        private static void CalculateResolution(Channel channel, uint packedNoiseLevel, byte[] athCurve, uint minResolution,
                                         uint maxResolution)
         {
             uint crCount = channel.CodedCount;
@@ -289,7 +289,7 @@ namespace ClHcaSharp
             Array.Clear(channel.Resolution, (int)crCount, (int)(SamplesPerSubframe - crCount));
         }
 
-        static void CalculateGain(Channel channel)
+        private static void CalculateGain(Channel channel)
         {
             uint cgCount = channel.CodedCount;
             for (int i = 0; i < cgCount; i++)
@@ -300,7 +300,7 @@ namespace ClHcaSharp
             }
         }
 
-        static void DequantizeCoefficients(Channel channel, BitReader bitReader)
+        private static void DequantizeCoefficients(Channel channel, BitReader bitReader)
         {
             uint ccCount = channel.CodedCount;
 
@@ -332,7 +332,7 @@ namespace ClHcaSharp
             Array.Clear(channel.Spectra, (int)ccCount, (int)(SamplesPerSubframe - ccCount));
         }
 
-        static void ReconstructNoise(Channel channel, uint minResolution, uint msStereo, ref uint random)
+        private static void ReconstructNoise(Channel channel, uint minResolution, uint msStereo, ref uint random)
         {
             if (minResolution > 0) return;
             if (channel.ValidCount <= 0 || channel.NoiseCount <= 0) return;
@@ -362,7 +362,7 @@ namespace ClHcaSharp
             }
         }
 
-        static void ReconstructHighFrequency(Channel channel, uint hfrGroupCount, uint bandsPerHfrGroup,
+        private static void ReconstructHighFrequency(Channel channel, uint hfrGroupCount, uint bandsPerHfrGroup,
                                              uint stereoBandCount, uint baseBandCount, uint totalBandCount, uint version)
         {
             if (bandsPerHfrGroup == 0) return;
@@ -406,7 +406,7 @@ namespace ClHcaSharp
             channel.Spectra[highBand - 1] = 0.0f;
         }
 
-        static void ApplyIntensityStereo(Channel[] channelPair, int channelOffset, int subframe, uint baseBandCount, uint totalBandCount)
+        private static void ApplyIntensityStereo(Channel[] channelPair, int channelOffset, int subframe, uint baseBandCount, uint totalBandCount)
         {
             if (channelPair[channelOffset + 0].Type != ChannelType.StereoPrimary) return;
 
@@ -424,7 +424,7 @@ namespace ClHcaSharp
             }
         }
 
-        static void ApplyMsStereo(Channel[] channelPair, int channelOffset, uint msStereo, uint baseBandCount, uint totalBandCount)
+        private static void ApplyMsStereo(Channel[] channelPair, int channelOffset, uint msStereo, uint baseBandCount, uint totalBandCount)
         {
             if (msStereo != 0) return;
             if (channelPair[channelOffset + 0].Type != ChannelType.StereoPrimary) return;
@@ -442,7 +442,7 @@ namespace ClHcaSharp
             }
         }
 
-        static void ImdctTransform(Channel channel, int subframe)
+        private static void ImdctTransform(Channel channel, int subframe)
         {
             const uint size = SamplesPerSubframe;
             const uint half = SamplesPerSubframe / 2;

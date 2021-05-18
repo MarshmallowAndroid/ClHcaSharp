@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using static ClHcaSharp.Constants;
@@ -232,6 +231,7 @@ namespace ClHcaSharp
                             channelTypes[0] = ChannelType.StereoPrimary;
                             channelTypes[1] = ChannelType.StereoSecondary;
                             break;
+
                         case 4:
                             channelTypes[0] = ChannelType.StereoPrimary;
                             channelTypes[1] = ChannelType.StereoSecondary;
@@ -241,6 +241,7 @@ namespace ClHcaSharp
                                 channelTypes[3] = ChannelType.StereoSecondary;
                             }
                             break;
+
                         case 5:
                             channelTypes[0] = ChannelType.StereoPrimary;
                             channelTypes[1] = ChannelType.StereoSecondary;
@@ -250,6 +251,7 @@ namespace ClHcaSharp
                                 channelTypes[4] = ChannelType.StereoSecondary;
                             }
                             break;
+
                         case 6:
                         case 7:
                             channelTypes[0] = ChannelType.StereoPrimary;
@@ -257,6 +259,7 @@ namespace ClHcaSharp
                             channelTypes[4] = ChannelType.StereoPrimary;
                             channelTypes[5] = ChannelType.StereoSecondary;
                             break;
+
                         case 8:
                             channelTypes[0] = ChannelType.StereoPrimary;
                             channelTypes[1] = ChannelType.StereoSecondary;
@@ -265,6 +268,7 @@ namespace ClHcaSharp
                             channelTypes[6] = ChannelType.StereoPrimary;
                             channelTypes[7] = ChannelType.StereoSecondary;
                             break;
+
                         default:
                             break;
                     }
@@ -277,7 +281,7 @@ namespace ClHcaSharp
                 hca.Channels[i] = new Channel
                 {
                     Type = channelTypes[i],
-                    CodedCount = 
+                    CodedCount =
                     channelTypes[i] != ChannelType.StereoSecondary ?
                     hca.BaseBandCount + hca.StereoBandCount :
                     hca.BaseBandCount

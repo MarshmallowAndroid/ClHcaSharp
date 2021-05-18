@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static ClHcaSharp.Constants;
+﻿using static ClHcaSharp.Constants;
 
 namespace ClHcaSharp
 {

@@ -1,6 +1,4 @@
-﻿using ClHcaSharp;
-
-namespace ClHcaSharp
+﻿namespace ClHcaSharp
 {
     public class BitReader
     {
