@@ -52,6 +52,9 @@ namespace ClHcaSharp
 
         public void DecodeBlock(byte[] data)
         {
+            if (data.Length < hca.FrameSize)
+                throw new ArgumentException("Data is less than expected frame size.");
+
             BitReader bitReader = new BitReader(data);
 
             ushort sync = (ushort)bitReader.Read(16);
