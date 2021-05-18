@@ -18,8 +18,6 @@ namespace ClHcaSharp
             Header.DecodeHeader(hca, hcaStream);
             SetKey(key);
 
-            //hcaStream.Position = (11 * hca.FrameSize);
-
             var testFile = new FileStream("test.raw", FileMode.Create);
             var testFileWriter = new BinaryWriter(testFile);
 
@@ -71,7 +69,7 @@ namespace ClHcaSharp
             for (int channel = 0; channel < hca.ChannelCount; channel++)
             {
                 UnpackScaleFactors(hca.Channels[channel], bitReader, hca.HfrGroupCount, hca.Version);
-                UnpackIntensity(hca.Channels[channel], bitReader, hca.Version);
+                UnpackIntensity(hca.Channels[channel], bitReader, hca.HfrGroupCount, hca.Version);
                 CalculateResolution(hca.Channels[channel], packedNoiseLevel, hca.AthCurve, hca.MinResolution, hca.MaxResolution);
                 CalculateGain(hca.Channels[channel]);
             }
@@ -170,7 +168,7 @@ namespace ClHcaSharp
             }
         }
 
-        private static void UnpackIntensity(Channel channel, BitReader bitReader, uint version)
+        private static void UnpackIntensity(Channel channel, BitReader bitReader, uint hfrGroupCount, uint version)
         {
             if (channel.Type == ChannelType.StereoSecondary)
             {
@@ -235,6 +233,19 @@ namespace ClHcaSharp
                         {
                             channel.Intensity[i] = 7;
                         }
+                    }
+                }
+            }
+            else
+            {
+                if (version <= Version200)
+                {
+                    byte[] hfrScales = channel.ScaleFactors;
+                    int hfrScalesOffset = (int)(128 - hfrGroupCount);
+
+                    for (int i = 0; i < hfrGroupCount; i++)
+                    {
+                        hfrScales[i] = (byte)bitReader.Read(6);
                     }
                 }
             }
@@ -429,7 +440,7 @@ namespace ClHcaSharp
             if (msStereo != 0) return;
             if (channelPair[channelOffset + 0].Type != ChannelType.StereoPrimary) return;
 
-            const float ratio = 0.70710676908493f;
+            float ratio = BitConverter.Int32BitsToSingle(0x3F3504F3);
             float[] spectraL = channelPair[channelOffset + 0].Spectra;
             float[] spectraR = channelPair[channelOffset + 1].Spectra;
 
