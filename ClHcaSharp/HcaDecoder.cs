@@ -16,29 +16,6 @@ namespace ClHcaSharp
 
             HcaHeader.DecodeHeader(hca, hcaStream);
             SetKey(key);
-
-            //var testFile = new FileStream("test.raw", FileMode.Create);
-            //var testFileWriter = new BinaryWriter(testFile);
-
-            //for (int i = 0; i < hca.FrameCount; i++)
-            //{
-            //    DecodeBlock(binaryReader.ReadBytes((int)hca.FrameSize));
-
-            //    for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
-            //    {
-            //        for (int sample = 0; sample < SamplesPerSubframe; sample++)
-            //        {
-            //            for (int channel = 0; channel < hca.ChannelCount; channel++)
-            //            {
-            //                float f = hca.Channels[channel].Wave[subframe][sample];
-            //                if (f > 1.0f) f = 1.0f;
-            //                else if (f < -1.0f) f = -1.0f;
-            //                short s = (short)(32767 * f);
-            //                testFileWriter.Write(s);
-            //            }
-            //        }
-            //    }
-            //}
         }
 
         public HcaInfo GetInfo()

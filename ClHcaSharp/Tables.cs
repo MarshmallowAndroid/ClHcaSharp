@@ -177,8 +177,6 @@ namespace ClHcaSharp
 
         public static float GetSinTableValue(int tableIndex, int offset) => BitConverter.Int32BitsToSingle((int)SinTablesHex[tableIndex][offset]);
 
-        //public static float GetSinTablesValue(int index) => BitConverter.Int32BitsToSingle((int)SinTablesHex[index % (7 * 64) / 64][index % 64]);
-
         public static readonly uint[][] CosTablesHex = new uint[7][]
         {
             new uint[64]
@@ -261,10 +259,6 @@ namespace ClHcaSharp
         };
 
         public static float GetCosTableValue(int tableIndex, int offset) => BitConverter.Int32BitsToSingle((int)CosTablesHex[tableIndex][offset]);
-
-        //public static float GetCosTablesValue(int index) => BitConverter.Int32BitsToSingle((int)CosTablesHex[index % (7 * 64) / 64][index % 64]);
-
-        /* HCA window function, close to a KBD window with an alpha of around 3.82 (similar to AAC/Vorbis) */
 
         public static readonly uint[] ImdctWindowHex = new uint[128]
         {

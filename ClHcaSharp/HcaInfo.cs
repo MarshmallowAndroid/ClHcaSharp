@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ClHcaSharp
+﻿namespace ClHcaSharp
 {
     public class HcaInfo
     {
