@@ -19,23 +19,25 @@ namespace ClHcaSharp
 
         public HcaInfo GetInfo()
         {
-            HcaInfo info = new HcaInfo();
-            info.Version = hca.Version;
-            info.HeaderSize = hca.HeaderSize;
-            info.SamplingRate = hca.SampleRate;
-            info.ChannelCount = hca.ChannelCount;
-            info.BlockSize = hca.FrameSize;
-            info.BlockCount = hca.FrameCount;
-            info.EncoderDelay = hca.EncoderDelay;
-            info.EncoderPadding = hca.EncoderPadding;
-            info.LoopEnabled = hca.LoopFlag;
-            info.LoopStartBlock = hca.LoopStartFrame;
-            info.LoopEndBlock = hca.LoopEndFrame;
-            info.LoopStartDelay = hca.LoopStartDelay;
-            info.LoopEndPadding = hca.LoopEndPadding;
-            info.SamplesPerBlock = SamplesPerFrame;
-            info.Comment = hca.Comment;
-            info.EncryptionEnabled = (uint)(hca.CiphType == 56 ? 1 : 0);
+            HcaInfo info = new()
+            {
+                Version = hca.Version,
+                HeaderSize = hca.HeaderSize,
+                SamplingRate = hca.SampleRate,
+                ChannelCount = hca.ChannelCount,
+                BlockSize = hca.FrameSize,
+                BlockCount = hca.FrameCount,
+                EncoderDelay = hca.EncoderDelay,
+                EncoderPadding = hca.EncoderPadding,
+                LoopEnabled = hca.LoopFlag,
+                LoopStartBlock = hca.LoopStartFrame,
+                LoopEndBlock = hca.LoopEndFrame,
+                LoopStartDelay = hca.LoopStartDelay,
+                LoopEndPadding = hca.LoopEndPadding,
+                SamplesPerBlock = SamplesPerFrame,
+                Comment = hca.Comment,
+                EncryptionEnabled = (uint)(hca.CiphType == 56 ? 1 : 0)
+            };
             return info;
         }
 
@@ -70,7 +72,7 @@ namespace ClHcaSharp
             if (data.Length < hca.FrameSize)
                 throw new ArgumentException("Data is less than expected frame size.");
 
-            BitReader bitReader = new BitReader(data);
+            BitReader bitReader = new(data);
 
             ushort sync = (ushort)bitReader.Read(16);
             if (sync != 0xFFFF) throw new InvalidDataException("Sync error.");
