@@ -18,5 +18,9 @@
         public uint SamplesPerBlock { get; set; }
         public string Comment { get; set; }
         public uint EncryptionEnabled { get; set; }
+
+        public uint SampleCount => BlockCount * SamplesPerBlock - EncoderDelay - EncoderPadding;
+        public uint LoopStartSample => LoopStartBlock * SamplesPerBlock - EncoderDelay + LoopStartDelay;
+        public uint LoopEndSample => LoopEndBlock * SamplesPerBlock - EncoderDelay + (SamplesPerBlock - LoopEndPadding);
     }
 }

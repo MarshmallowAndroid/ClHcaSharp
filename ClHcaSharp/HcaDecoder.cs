@@ -67,6 +67,27 @@ namespace ClHcaSharp
             }
         }
 
+        public void ReadSamples16(short[] samples)
+        {
+            int sampleIndex = 0;
+            for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
+            {
+                for (int sample = 0; sample < SamplesPerSubframe; sample++)
+                {
+                    for (int channel = 0; channel < hca.ChannelCount; channel++)
+                    {
+                        float f = hca.Channels[channel].Wave[subframe][sample];
+                        int sInt = (int)(32768 * f);
+                        if (sInt > 32767)
+                            sInt = 32767;
+                        else if (sInt < -32767)
+                            sInt = -32767;
+                        samples[sampleIndex++] = (short)sInt;
+                    }
+                }
+            }
+        }
+
         public void DecodeBlock(byte[] data)
         {
             if (data.Length < hca.FrameSize)
