@@ -263,7 +263,7 @@ namespace ClHcaSharp
 
                     for (int i = 0; i < hfrGroupCount; i++)
                     {
-                        hfrScales[i] = (byte)bitReader.Read(6);
+                        hfrScales[hfrScalesOffset + i] = (byte)bitReader.Read(6);
                     }
                 }
             }
