@@ -12,42 +12,81 @@ namespace ClHcaSharp
 
         public HcaDecoder(Stream hcaStream, ulong key)
         {
-            binaryReader = new BinaryReader(hcaStream);
             hca = new HcaContext();
 
-            Header.DecodeHeader(hca, hcaStream);
+            HcaHeader.DecodeHeader(hca, hcaStream);
             SetKey(key);
 
-            var testFile = new FileStream("test.raw", FileMode.Create);
-            var testFileWriter = new BinaryWriter(testFile);
+            //var testFile = new FileStream("test.raw", FileMode.Create);
+            //var testFileWriter = new BinaryWriter(testFile);
 
-            for (int i = 0; i < hca.FrameCount; i++)
-            {
-                DecodeBlock(binaryReader.ReadBytes((int)hca.FrameSize));
+            //for (int i = 0; i < hca.FrameCount; i++)
+            //{
+            //    DecodeBlock(binaryReader.ReadBytes((int)hca.FrameSize));
 
-                for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
-                {
-                    for (int sample = 0; sample < SamplesPerSubframe; sample++)
-                    {
-                        for (int channel = 0; channel < hca.ChannelCount; channel++)
-                        {
-                            float f = hca.Channels[channel].Wave[subframe][sample];
-                            short s = (short)(32768 * f);
-                            if (s > 32767)
-                                s = 32767;
-                            else if (s < -32767)
-                                s = -32767;
-                            testFileWriter.Write(s);
-                        }
-                    }
-                }
-            }
+            //    for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
+            //    {
+            //        for (int sample = 0; sample < SamplesPerSubframe; sample++)
+            //        {
+            //            for (int channel = 0; channel < hca.ChannelCount; channel++)
+            //            {
+            //                float f = hca.Channels[channel].Wave[subframe][sample];
+            //                if (f > 1.0f) f = 1.0f;
+            //                else if (f < -1.0f) f = -1.0f;
+            //                short s = (short)(32767 * f);
+            //                testFileWriter.Write(s);
+            //            }
+            //        }
+            //    }
+            //}
+        }
+
+        public HcaInfo GetInfo()
+        {
+            HcaInfo info = new HcaInfo();
+            info.Version = hca.Version;
+            info.HeaderSize = hca.HeaderSize;
+            info.SamplingRate = hca.SampleRate;
+            info.ChannelCount = hca.ChannelCount;
+            info.BlockSize = hca.FrameSize;
+            info.BlockCount = hca.FrameCount;
+            info.EncoderDelay = hca.EncoderDelay;
+            info.EncoderPadding = hca.EncoderPadding;
+            info.LoopEnabled = hca.LoopFlag;
+            info.LoopStartBlock = hca.LoopStartFrame;
+            info.LoopEndBlock = hca.LoopEndFrame;
+            info.LoopStartDelay = hca.LoopStartDelay;
+            info.LoopEndPadding = hca.LoopEndPadding;
+            info.SamplesPerBlock = SamplesPerFrame;
+            info.Comment = hca.Comment;
+            info.EncryptionEnabled = (uint)(hca.CiphType == 56 ? 1 : 0);
+            return info;
         }
 
         public void SetKey(ulong key)
         {
             hca.KeyCode = key;
             hca.CipherTable = Cipher.Init(hca.CiphType, hca.KeyCode);
+        }
+
+        public void ReadSamples16(short[][] samples)
+        {
+            for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
+            {
+                for (int sample = 0; sample < SamplesPerSubframe; sample++)
+                {
+                    for (int channel = 0; channel < hca.ChannelCount; channel++)
+                    {
+                        float f = hca.Channels[channel].Wave[subframe][sample];
+                        int sInt = (int)(32768 * f);
+                        if (sInt > 32767)
+                            sInt = 32767;
+                        else if (sInt < -32767)
+                            sInt = -32767;
+                        samples[channel][(SamplesPerSubframe * subframe) + sample] = (short)sInt;
+                    }
+                }
+            }
         }
 
         public void DecodeBlock(byte[] data)

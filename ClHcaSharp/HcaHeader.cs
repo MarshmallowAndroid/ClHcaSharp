@@ -5,7 +5,7 @@ using static ClHcaSharp.Constants;
 
 namespace ClHcaSharp
 {
-    public static class Header
+    public static class HcaHeader
     {
         public static bool IsHeaderValid(Stream hcaStream, out uint headerSize)
         {
@@ -219,6 +219,11 @@ namespace ClHcaSharp
 
             uint channelsPerTrack = hca.ChannelCount / hca.TrackCount;
             ChannelType[] channelTypes = new ChannelType[channelsPerTrack];
+
+            for (int i = 0; i < channelTypes.Length; i++)
+            {
+                channelTypes[i] = ChannelType.Discrete;
+            }
 
             if (hca.StereoBandCount > 0 && channelsPerTrack > 1)
             {
