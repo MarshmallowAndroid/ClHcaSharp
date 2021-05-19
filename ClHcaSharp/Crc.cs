@@ -1,6 +1,6 @@
 ﻿namespace ClHcaSharp
 {
-    public static class Crc
+    internal static class Crc
     {
         private static readonly ushort[] crcMaskTable = new ushort[]
         {

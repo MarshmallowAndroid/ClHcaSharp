@@ -7,7 +7,6 @@ namespace ClHcaSharp
 {
     public class HcaDecoder
     {
-        private readonly BinaryReader binaryReader;
         private readonly HcaContext hca;
 
         public HcaDecoder(Stream hcaStream, ulong key)

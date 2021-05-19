@@ -2,7 +2,7 @@
 
 namespace ClHcaSharp
 {
-    public static class Tables
+    internal static class Tables
     {
         public static readonly byte[] InvertTable = new byte[66]
         {

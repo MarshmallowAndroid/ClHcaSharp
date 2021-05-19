@@ -5,7 +5,7 @@ using static ClHcaSharp.Constants;
 
 namespace ClHcaSharp
 {
-    public static class HcaHeader
+    internal static class HcaHeader
     {
         public static bool IsHeaderValid(Stream hcaStream, out uint headerSize)
         {

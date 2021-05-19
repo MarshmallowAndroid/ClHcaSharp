@@ -1,6 +1,6 @@
 ﻿namespace ClHcaSharp
 {
-    public class HcaContext
+    internal class HcaContext
     {
         public uint Version { get; set; }
         public uint HeaderSize { get; set; }

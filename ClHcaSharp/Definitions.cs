@@ -1,6 +1,6 @@
 ﻿namespace ClHcaSharp
 {
-    public static class Constants
+    internal static class Constants
     {
         public const uint Version101 = 0x0101;
         public const uint Version102 = 0x0102;

@@ -2,7 +2,7 @@
 
 namespace ClHcaSharp
 {
-    public class Channel
+    internal class Channel
     {
         public ChannelType Type { get; set; }
         public uint CodedCount { get; set; }

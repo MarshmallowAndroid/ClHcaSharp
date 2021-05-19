@@ -1,6 +1,6 @@
 ﻿namespace ClHcaSharp
 {
-    public class BitReader
+    internal class BitReader
     {
         private static readonly uint[] mask32 = new uint[]
         {

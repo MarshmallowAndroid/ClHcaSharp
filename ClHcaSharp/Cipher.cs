@@ -2,7 +2,7 @@
 
 namespace ClHcaSharp
 {
-    public static class Cipher
+    internal static class Cipher
     {
         public static void Decrypt(byte[] cipherData, byte[] data)
         {

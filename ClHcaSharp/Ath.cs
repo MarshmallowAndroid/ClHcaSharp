@@ -3,7 +3,7 @@ using static ClHcaSharp.Constants;
 
 namespace ClHcaSharp
 {
-    public static class Ath
+    internal static class Ath
     {
         private static readonly byte[] baseCurve = new byte[656]
         {

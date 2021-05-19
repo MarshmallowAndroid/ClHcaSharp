@@ -2,7 +2,7 @@
 
 namespace ClHcaSharp
 {
-    public static class JaggedArray
+    internal static class JaggedArray
     {
         public static T CreateJaggedArray<T>(params int[] lengths)
         {
