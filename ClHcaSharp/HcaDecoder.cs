@@ -13,7 +13,7 @@ namespace ClHcaSharp
         {
             hca = new HcaContext();
 
-            HcaHeader.DecodeHeader(hca, hcaStream);
+            Header.DecodeHeader(hca, hcaStream);
             SetKey(key);
         }
 
@@ -84,6 +84,21 @@ namespace ClHcaSharp
                             sInt = -32767;
                         samples[sampleIndex++] = (short)sInt;
                     }
+                }
+            }
+        }
+
+        public void DecodeReset()
+        {
+            if (hca != null)
+            {
+                hca.Random = DefaultRandom;
+
+                for (int i = 0; i < hca.ChannelCount; i++)
+                {
+                    Channel channel = hca.Channels[i];
+
+                    Array.Clear(channel.ImdctPrevious, 0, channel.ImdctPrevious.Length);
                 }
             }
         }
