@@ -523,8 +523,7 @@ namespace ClHcaSharp
             for (int i = 0; i < mdctBits; i++)
             {
                 float[] swap;
-                float[] d1 = temp2;
-                float[] d2 = temp2;
+                float[] d = temp2;
                 int d1Index = 0;
                 int d2Index = count2;
 
@@ -534,8 +533,8 @@ namespace ClHcaSharp
                     {
                         float a = temp1[temp1Index++];
                         float b = temp1[temp1Index++];
-                        d1[d1Index++] = a + b;
-                        d2[d2Index++] = a - b;
+                        d[d1Index++] = a + b;
+                        d[d2Index++] = a - b;
                     }
 
                     d1Index += count2;
@@ -562,10 +561,8 @@ namespace ClHcaSharp
                 int cosTableIndex = 0;
 
                 float[] swap;
-                float[] d1 = temp2;
-                float[] d2 = temp2;
-                float[] s1 = temp1;
-                float[] s2 = temp1;
+                float[] d = temp2;
+                float[] s = temp1;
                 int d1Index = 0;
                 int d2Index = count2 * 2 - 1;
                 int s1Index = 0;
@@ -575,12 +572,12 @@ namespace ClHcaSharp
                 {
                     for (int k = 0; k < count2; k++)
                     {
-                        float a = s1[s1Index++];
-                        float b = s2[s2Index++];
+                        float a = s[s1Index++];
+                        float b = s[s2Index++];
                         float sin = GetSinTableValue(i, sinTableIndex++);
                         float cos = GetCosTableValue(i, cosTableIndex++);
-                        d1[d1Index++] = a * sin - b * cos;
-                        d2[d2Index--] = a * cos + b * sin;
+                        d[d1Index++] = a * sin - b * cos;
+                        d[d2Index--] = a * cos + b * sin;
                     }
 
                     s1Index += count2;
