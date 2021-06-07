@@ -7,7 +7,7 @@ namespace ClHcaSharp
 {
     internal static class Header
     {
-        public static bool IsHeaderValid(Stream hcaStream, out uint headerSize)
+        public static bool IsHeaderValid(Stream hcaStream, out int headerSize)
         {
             BitReader bitReader = new(new BinaryReader(hcaStream).ReadBytes(8));
 
@@ -25,7 +25,7 @@ namespace ClHcaSharp
 
         public static void DecodeHeader(HcaContext hca, Stream hcaStream)
         {
-            if (!IsHeaderValid(hcaStream, out uint headerSize))
+            if (!IsHeaderValid(hcaStream, out int headerSize))
                 throw new InvalidDataException("Invalid HCA header.");
 
             BinaryReader binaryReader = new(hcaStream);
@@ -119,7 +119,7 @@ namespace ClHcaSharp
                 bitReader.Skip(32);
                 hca.AthType = bitReader.Read(16);
             }
-            else hca.AthType = (uint)((hca.Version < Version200) ? 1 : 0);
+            else hca.AthType = (hca.Version < Version200) ? 1 : 0;
 
             if (headerSize >= 16 && (bitReader.Peek(32) & Mask) == StringToUInt32("loop"))
             {
@@ -129,7 +129,7 @@ namespace ClHcaSharp
                 hca.LoopStartDelay = bitReader.Read(16);
                 hca.LoopEndPadding = bitReader.Read(16);
 
-                hca.LoopFlag = 1;
+                hca.LoopFlag = true;
 
                 if (hca.LoopStartFrame < 0 || hca.LoopStartFrame > hca.LoopEndFrame || hca.LoopEndFrame >= hca.FrameCount)
                     throw new InvalidDataException("Invalid loop frames.");
@@ -143,7 +143,7 @@ namespace ClHcaSharp
                 hca.LoopStartDelay = 0;
                 hca.LoopEndPadding = 0;
 
-                hca.LoopFlag = 0;
+                hca.LoopFlag = true;
             }
 
             if (headerSize >= 6 && (bitReader.Peek(32) & Mask) == StringToUInt32("ciph"))
@@ -160,7 +160,7 @@ namespace ClHcaSharp
             if (headerSize >= 8 && (bitReader.Peek(32) & Mask) == StringToUInt32("rva"))
             {
                 bitReader.Skip(32);
-                uint rvaVolumeInt = bitReader.Read(32);
+                int rvaVolumeInt = bitReader.Read(32);
                 hca.RvaVolume = BitConverter.ToSingle(BitConverter.GetBytes(rvaVolumeInt));
 
                 headerSize -= 8;
@@ -218,7 +218,7 @@ namespace ClHcaSharp
             hca.AthCurve = Ath.Init(hca.AthType, hca.SampleRate);
             hca.CipherTable = Cipher.Init(hca.CiphType, hca.KeyCode);
 
-            uint channelsPerTrack = hca.ChannelCount / hca.TrackCount;
+            int channelsPerTrack = hca.ChannelCount / hca.TrackCount;
             ChannelType[] channelTypes = new ChannelType[channelsPerTrack];
 
             for (int i = 0; i < channelTypes.Length; i++)
@@ -301,10 +301,10 @@ namespace ClHcaSharp
                 throw new InvalidDataException();
         }
 
-        private static uint HeaderCeil2(uint a, uint b)
+        private static int HeaderCeil2(int a, int b)
         {
             if (b < 1) return 0;
-            return (uint)(a / b + ((a % b) > 0 ? 1 : 0));
+            return a / b + ((a % b) > 0 ? 1 : 0);
         }
 
         private static uint StringToUInt32(string value)

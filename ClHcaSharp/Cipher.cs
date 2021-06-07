@@ -12,7 +12,7 @@ namespace ClHcaSharp
             }
         }
 
-        public static byte[] Init(uint type, ulong keyCode)
+        public static byte[] Init(int type, ulong keyCode)
         {
             if (type == 56 && keyCode == 0) type = 0;
 

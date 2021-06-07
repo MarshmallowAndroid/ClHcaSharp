@@ -2,25 +2,25 @@
 {
     public class HcaInfo
     {
-        public uint Version { get; set; }
-        public uint HeaderSize { get; set; }
-        public uint SamplingRate { get; set; }
-        public uint ChannelCount { get; set; }
-        public uint BlockSize { get; set; }
-        public uint BlockCount { get; set; }
-        public uint EncoderDelay { get; set; }
-        public uint EncoderPadding { get; set; }
-        public uint LoopEnabled { get; set; }
-        public uint LoopStartBlock { get; set; }
-        public uint LoopEndBlock { get; set; }
-        public uint LoopStartDelay { get; set; }
-        public uint LoopEndPadding { get; set; }
-        public uint SamplesPerBlock { get; set; }
+        public int Version { get; set; }
+        public int HeaderSize { get; set; }
+        public int SamplingRate { get; set; }
+        public int ChannelCount { get; set; }
+        public int BlockSize { get; set; }
+        public int BlockCount { get; set; }
+        public int EncoderDelay { get; set; }
+        public int EncoderPadding { get; set; }
+        public bool LoopEnabled { get; set; }
+        public int LoopStartBlock { get; set; }
+        public int LoopEndBlock { get; set; }
+        public int LoopStartDelay { get; set; }
+        public int LoopEndPadding { get; set; }
+        public int SamplesPerBlock { get; set; }
         public string Comment { get; set; }
-        public uint EncryptionEnabled { get; set; }
+        public bool EncryptionEnabled { get; set; }
 
-        public uint SampleCount => BlockCount * SamplesPerBlock - EncoderDelay - EncoderPadding;
-        public uint LoopStartSample => LoopStartBlock * SamplesPerBlock - EncoderDelay + LoopStartDelay;
-        public uint LoopEndSample => LoopEndBlock * SamplesPerBlock - EncoderDelay + (SamplesPerBlock - LoopEndPadding);
+        public int SampleCount => BlockCount * SamplesPerBlock - EncoderDelay - EncoderPadding;
+        public int LoopStartSample => LoopStartBlock * SamplesPerBlock - EncoderDelay + LoopStartDelay;
+        public int LoopEndSample => LoopEndBlock * SamplesPerBlock - EncoderDelay + (SamplesPerBlock - LoopEndPadding);
     }
 }

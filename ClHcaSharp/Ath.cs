@@ -50,7 +50,7 @@ namespace ClHcaSharp
             0xEF, 0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFF, 0xFF
         };
 
-        public static byte[] Init(uint type, uint sampleRate)
+        public static byte[] Init(int type, int sampleRate)
         {
             return type switch
             {
@@ -71,19 +71,19 @@ namespace ClHcaSharp
             return athCurve;
         }
 
-        private static byte[] Init1(uint sampleRate)
+        private static byte[] Init1(int sampleRate)
         {
             byte[] athCurve = new byte[SamplesPerSubframe];
-            uint acc = 0;
+            int acc = 0;
 
             for (int i = 0; i < athCurve.Length; i++)
             {
                 acc += sampleRate;
-                uint index = acc >> 13;
+                int index = acc >> 13;
 
                 if (index >= 654)
                 {
-                    Array.Fill<byte>(athCurve, 0xFF, i, (int)SamplesPerSubframe - i);
+                    Array.Fill<byte>(athCurve, 0xFF, i, SamplesPerSubframe - i);
                     break;
                 }
                 athCurve[i] = baseCurve[index];

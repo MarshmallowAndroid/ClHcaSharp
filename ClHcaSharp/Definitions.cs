@@ -2,27 +2,27 @@
 {
     internal static class Constants
     {
-        public const uint Version101 = 0x0101;
-        public const uint Version102 = 0x0102;
-        public const uint Version103 = 0x0103;
-        public const uint Version200 = 0x0200;
-        public const uint Version300 = 0x0300;
+        public const int Version101 = 0x0101;
+        public const int Version102 = 0x0102;
+        public const int Version103 = 0x0103;
+        public const int Version200 = 0x0200;
+        public const int Version300 = 0x0300;
 
-        public const uint MinFrameSize = 0x8;
-        public const uint MaxFrameSize = 0xFFFF;
+        public const int MinFrameSize = 0x8;
+        public const int MaxFrameSize = 0xFFFF;
 
-        public const uint Mask = 0x7F7F7F7F;
-        public const uint SubframesPerFrame = 8;
-        public const uint SamplesPerSubframe = 128;
-        public const uint SamplesPerFrame = SubframesPerFrame * SamplesPerSubframe;
-        public const uint MdctBits = 7;
+        public const int Mask = 0x7F7F7F7F;
+        public const int SubframesPerFrame = 8;
+        public const int SamplesPerSubframe = 128;
+        public const int SamplesPerFrame = SubframesPerFrame * SamplesPerSubframe;
+        public const int MdctBits = 7;
 
-        public const uint MinChannels = 1;
-        public const uint MaxChannels = 16;
-        public const uint MinSampleRate = 1;
-        public const uint MaxSampleRate = 0x7FFFFF;
+        public const int MinChannels = 1;
+        public const int MaxChannels = 16;
+        public const int MinSampleRate = 1;
+        public const int MaxSampleRate = 0x7FFFFF;
 
-        public const uint DefaultRandom = 1;
+        public const int DefaultRandom = 1;
     }
 
     public enum ChannelType

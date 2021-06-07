@@ -2,52 +2,52 @@
 {
     internal class HcaContext
     {
-        public uint Version { get; set; }
-        public uint HeaderSize { get; set; }
+        public int Version { get; set; }
+        public int HeaderSize { get; set; }
 
-        public uint ChannelCount { get; set; }
-        public uint SampleRate { get; set; }
-        public uint FrameCount { get; set; }
-        public uint EncoderDelay { get; set; }
-        public uint EncoderPadding { get; set; }
+        public int ChannelCount { get; set; }
+        public int SampleRate { get; set; }
+        public int FrameCount { get; set; }
+        public int EncoderDelay { get; set; }
+        public int EncoderPadding { get; set; }
 
-        public uint FrameSize { get; set; }
-        public uint MinResolution { get; set; }
-        public uint MaxResolution { get; set; }
-        public uint TrackCount { get; set; }
-        public uint ChannelConfig { get; set; }
-        public uint StereoType { get; set; }
-        public uint TotalBandCount { get; set; }
-        public uint BaseBandCount { get; set; }
-        public uint StereoBandCount { get; set; }
-        public uint BandsPerHfrGroup { get; set; }
-        public uint MsStereo { get; set; }
-        public uint Reserved { get; set; }
+        public int FrameSize { get; set; }
+        public int MinResolution { get; set; }
+        public int MaxResolution { get; set; }
+        public int TrackCount { get; set; }
+        public int ChannelConfig { get; set; }
+        public int StereoType { get; set; }
+        public int TotalBandCount { get; set; }
+        public int BaseBandCount { get; set; }
+        public int StereoBandCount { get; set; }
+        public int BandsPerHfrGroup { get; set; }
+        public int MsStereo { get; set; }
+        public int Reserved { get; set; }
 
-        public uint VbrMaxFrameSize { get; set; }
-        public uint VbrNoiseLevel { get; set; }
+        public int VbrMaxFrameSize { get; set; }
+        public int VbrNoiseLevel { get; set; }
 
-        public uint AthType { get; set; }
+        public int AthType { get; set; }
 
-        public uint LoopStartFrame { get; set; }
-        public uint LoopEndFrame { get; set; }
-        public uint LoopStartDelay { get; set; }
-        public uint LoopEndPadding { get; set; }
-        public uint LoopFlag { get; set; }
+        public int LoopStartFrame { get; set; }
+        public int LoopEndFrame { get; set; }
+        public int LoopStartDelay { get; set; }
+        public int LoopEndPadding { get; set; }
+        public bool LoopFlag { get; set; }
 
-        public uint CiphType { get; set; }
+        public int CiphType { get; set; }
         public ulong KeyCode { get; set; }
 
         public float RvaVolume { get; set; }
 
-        public uint CommentLength { get; set; }
+        public int CommentLength { get; set; }
         public string Comment { get; set; }
 
-        public uint HfrGroupCount { get; set; }
+        public int HfrGroupCount { get; set; }
         public byte[] AthCurve { get; set; }
         public byte[] CipherTable { get; set; }
 
-        public uint Random { get; set; }
+        public int Random { get; set; }
         public Channel[] Channels { get; set; }
     }
 }
