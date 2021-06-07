@@ -1,4 +1,6 @@
-﻿namespace ClHcaSharp
+﻿using System;
+
+namespace ClHcaSharp
 {
     internal static class Constants
     {
@@ -23,6 +25,8 @@
         public const int MaxSampleRate = 0x7FFFFF;
 
         public const int DefaultRandom = 1;
+
+        public static readonly float MsStereoRatio = BitConverter.Int32BitsToSingle(0x3F3504F3);
     }
 
     public enum ChannelType

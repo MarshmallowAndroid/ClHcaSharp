@@ -495,7 +495,7 @@ namespace ClHcaSharp
             if (msStereo != 0) return;
             if (channelPair[channelOffset + 0].Type != ChannelType.StereoPrimary) return;
 
-            float ratio = BitConverter.Int32BitsToSingle(0x3F3504F3);
+            float ratio = MsStereoRatio;
             float[] spectraL = channelPair[channelOffset + 0].Spectra;
             float[] spectraR = channelPair[channelOffset + 1].Spectra;
 
