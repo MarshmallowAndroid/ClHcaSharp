@@ -245,13 +245,12 @@ namespace ClHcaSharp
                 else
                 {
                     byte value = (byte)bitReader.Peek(4);
-                    byte deltaBits;
 
                     if (value < 15)
                     {
                         bitReader.Skip(4);
 
-                        deltaBits = (byte)bitReader.Read(2);
+                        byte deltaBits = (byte)bitReader.Read(2);
 
                         channel.Intensity[0] = value;
                         if (deltaBits == 3)
@@ -404,25 +403,18 @@ namespace ClHcaSharp
             if (channel.ValidCount <= 0 || channel.NoiseCount <= 0) return;
             if (msStereo != 0 && channel.Type == ChannelType.StereoPrimary) return;
 
-            int randomIndex;
-            int noiseIndex;
-            int validIndex;
-            int sfNoise;
-            int sfValid;
-            int scIndex;
-
             for (int i = 0; i < channel.NoiseCount; i++)
             {
                 random = 0x343FD * random + 0x269EC3;
 
-                randomIndex = SamplesPerSubframe - channel.ValidCount + (((random & 0x7FFF) * channel.ValidCount) >> 15);
+                int randomIndex = SamplesPerSubframe - channel.ValidCount + (((random & 0x7FFF) * channel.ValidCount) >> 15);
 
-                noiseIndex = channel.Noises[i];
-                validIndex = channel.Noises[randomIndex];
+                int noiseIndex = channel.Noises[i];
+                int validIndex = channel.Noises[randomIndex];
 
-                sfNoise = channel.ScaleFactors[noiseIndex];
-                sfValid = channel.ScaleFactors[validIndex];
-                scIndex = (sfNoise - sfValid + 62) & ~((sfNoise - sfValid + 62) >> 31);
+                int sfNoise = channel.ScaleFactors[noiseIndex];
+                int sfValid = channel.ScaleFactors[validIndex];
+                int scIndex = (sfNoise - sfValid + 62) & ~((sfNoise - sfValid + 62) >> 31);
 
                 channel.Spectra[noiseIndex] = GetScaleConversionTableValue(scIndex) * channel.Spectra[validIndex];
             }
@@ -438,7 +430,6 @@ namespace ClHcaSharp
             int startBand = stereoBandCount + baseBandCount;
             int highBand = startBand;
             int lowBand = startBand - 1;
-            int scIndex;
 
             int hfrScalesOffset = 128 - hfrGroupCount;
             byte[] hfrScales = channel.ScaleFactors;
@@ -459,7 +450,7 @@ namespace ClHcaSharp
                 {
                     if (highBand >= totalBandCount || lowBand < 0) break;
 
-                    scIndex = hfrScales[hfrScalesOffset + group];
+                    int scIndex = hfrScales[hfrScalesOffset + group];
                     scIndex &= ~(scIndex >> 31);
 
                     channel.Spectra[highBand] = GetScaleConversionTableValue(scIndex) * channel.Spectra[lowBand];
