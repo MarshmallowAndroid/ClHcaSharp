@@ -143,7 +143,7 @@ namespace ClHcaSharp
                 hca.LoopStartDelay = 0;
                 hca.LoopEndPadding = 0;
 
-                hca.LoopFlag = true;
+                hca.LoopFlag = false;
             }
 
             if (headerSize >= 6 && (bitReader.Peek(32) & Mask) == StringToUInt32("ciph"))
