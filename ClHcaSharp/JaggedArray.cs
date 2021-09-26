@@ -9,7 +9,7 @@ namespace ClHcaSharp
             return (T)InitJaggedArray(typeof(T).GetElementType(), lengths, 0);
         }
 
-        public static object InitJaggedArray(Type type, int[] lengths, int arrayIndex)
+        private static object InitJaggedArray(Type type, int[] lengths, int arrayIndex)
         {
             Array array = Array.CreateInstance(type, lengths[arrayIndex]);
             Type subElementType = type.GetElementType();
