@@ -36,6 +36,8 @@
             dataSize = data.Length * 8;
         }
 
+        public int Bit => currentBit;
+
         public int Peek(int bits)
         {
             int bit = currentBit;

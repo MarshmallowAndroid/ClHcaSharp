@@ -14,9 +14,9 @@ namespace ClHcaSharp
         public const int MaxFrameSize = 0xFFFF;
 
         public const int Mask = 0x7F7F7F7F;
-        public const int SubframesPerFrame = 8;
+        public const int Subframes = 8;
         public const int SamplesPerSubframe = 128;
-        public const int SamplesPerFrame = SubframesPerFrame * SamplesPerSubframe;
+        public const int SamplesPerFrame = Subframes * SamplesPerSubframe;
         public const int MdctBits = 7;
 
         public const int MinChannels = 1;

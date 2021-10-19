@@ -49,7 +49,7 @@ namespace ClHcaSharp
 
         public void ReadSamples16(short[][] samples)
         {
-            for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
+            for (int subframe = 0; subframe < Subframes; subframe++)
             {
                 for (int sample = 0; sample < SamplesPerSubframe; sample++)
                 {
@@ -70,7 +70,7 @@ namespace ClHcaSharp
         public void ReadSamples16(short[] samples)
         {
             int sampleIndex = 0;
-            for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
+            for (int subframe = 0; subframe < Subframes; subframe++)
             {
                 for (int sample = 0; sample < SamplesPerSubframe; sample++)
                 {
@@ -103,7 +103,7 @@ namespace ClHcaSharp
             }
         }
 
-        public void DecodeBlock(byte[] data)
+        public int DecodeBlockUnpack(byte[] data)
         {
             if (data.Length < hca.FrameSize)
                 throw new ArgumentException("Data is less than expected frame size.");
@@ -130,20 +130,28 @@ namespace ClHcaSharp
                 CalculateGain(hca.Channels[channel]);
             }
 
-            for (int subframe = 0; subframe < SubframesPerFrame; subframe++)
+            for (int subframe = 0; subframe < Subframes; subframe++)
             {
                 for (int channel = 0; channel < hca.ChannelCount; channel++)
                 {
-                    DequantizeCoefficients(hca.Channels[channel], bitReader);
+                    DequantizeCoefficients(hca.Channels[channel], bitReader, subframe);
                 }
+            }
 
+            return bitReader.Bit;
+        }
+
+        public void DecodeBlockTransform()
+        {
+            for (int subframe = 0; subframe < Subframes; subframe++)
+            {
                 for (int channel = 0; channel < hca.ChannelCount; channel++)
                 {
                     int random = hca.Random;
-                    ReconstructNoise(hca.Channels[channel], hca.MinResolution, hca.MsStereo, ref random);
+                    ReconstructNoise(hca.Channels[channel], hca.MinResolution, hca.MsStereo, ref random, subframe);
                     hca.Random = random;
                     ReconstructHighFrequency(hca.Channels[channel], hca.HfrGroupCount, hca.BandsPerHfrGroup,
-                                             hca.StereoBandCount, hca.BaseBandCount, hca.TotalBandCount, hca.Version);
+                                             hca.StereoBandCount, hca.BaseBandCount, hca.TotalBandCount, hca.Version, subframe);
                 }
 
                 if (hca.StereoBandCount > 0)
@@ -151,7 +159,7 @@ namespace ClHcaSharp
                     for (int ch = 0; ch < hca.ChannelCount - 1; ch++)
                     {
                         ApplyIntensityStereo(hca.Channels, ch * 2, subframe, hca.BaseBandCount, hca.TotalBandCount);
-                        ApplyMsStereo(hca.Channels, ch * 2, hca.MsStereo, hca.BaseBandCount, hca.TotalBandCount);
+                        ApplyMsStereo(hca.Channels, ch * 2, hca.MsStereo, hca.BaseBandCount, hca.TotalBandCount, subframe);
                     }
                 }
 
@@ -160,6 +168,17 @@ namespace ClHcaSharp
                     ImdctTransform(hca.Channels[channel], subframe);
                 }
             }
+        }
+
+        public int DecodeBlock(byte[] data)
+        {
+            int result = DecodeBlockUnpack(data);
+
+            if (result < 0) return result;
+
+            DecodeBlockTransform();
+
+            return result;
         }
 
         private static void UnpackScaleFactors(Channel channel, BitReader bitReader, int hfrGroupCount, int version)
@@ -236,7 +255,7 @@ namespace ClHcaSharp
                     if (value < 15)
                     {
                         bitReader.Skip(4);
-                        for (int i = 1; i < SubframesPerFrame; i++)
+                        for (int i = 1; i < Subframes; i++)
                         {
                             channel.Intensity[i] = (byte)bitReader.Read(4);
                         }
@@ -255,7 +274,7 @@ namespace ClHcaSharp
                         channel.Intensity[0] = value;
                         if (deltaBits == 3)
                         {
-                            for (int i = 1; i < SubframesPerFrame; i++)
+                            for (int i = 1; i < Subframes; i++)
                             {
                                 channel.Intensity[i] = (byte)bitReader.Read(4);
                             }
@@ -265,7 +284,7 @@ namespace ClHcaSharp
                             byte bMax = (byte)((2 << deltaBits) - 1);
                             byte bits = (byte)(deltaBits + 1);
 
-                            for (int i = 1; i < SubframesPerFrame; i++)
+                            for (int i = 1; i < Subframes; i++)
                             {
                                 byte delta = (byte)bitReader.Read(bits);
                                 if (delta == bMax)
@@ -284,7 +303,7 @@ namespace ClHcaSharp
                     else
                     {
                         bitReader.Skip(4);
-                        for (int i = 0; i < SubframesPerFrame; i++)
+                        for (int i = 0; i < Subframes; i++)
                         {
                             channel.Intensity[i] = 7;
                         }
@@ -365,7 +384,7 @@ namespace ClHcaSharp
             }
         }
 
-        private static void DequantizeCoefficients(Channel channel, BitReader bitReader)
+        private static void DequantizeCoefficients(Channel channel, BitReader bitReader, int subframe)
         {
             int ccCount = channel.CodedCount;
 
@@ -391,13 +410,13 @@ namespace ClHcaSharp
                     qc = ReadValueTable[index];
                 }
 
-                channel.Spectra[i] = channel.Gain[i] * qc;
+                channel.Spectra[subframe][i] = channel.Gain[i] * qc;
             }
 
-            Array.Clear(channel.Spectra, ccCount, SamplesPerSubframe - ccCount);
+            Array.Clear(channel.Spectra[subframe], ccCount, SamplesPerSubframe - ccCount);
         }
 
-        private static void ReconstructNoise(Channel channel, int minResolution, int msStereo, ref int random)
+        private static void ReconstructNoise(Channel channel, int minResolution, int msStereo, ref int random, int subframe)
         {
             if (minResolution > 0) return;
             if (channel.ValidCount <= 0 || channel.NoiseCount <= 0) return;
@@ -416,12 +435,12 @@ namespace ClHcaSharp
                 int sfValid = channel.ScaleFactors[validIndex];
                 int scIndex = (sfNoise - sfValid + 62) & ~((sfNoise - sfValid + 62) >> 31);
 
-                channel.Spectra[noiseIndex] = GetScaleConversionTableValue(scIndex) * channel.Spectra[validIndex];
+                channel.Spectra[subframe][noiseIndex] = GetScaleConversionTableValue(scIndex) * channel.Spectra[subframe][validIndex];
             }
         }
 
         private static void ReconstructHighFrequency(Channel channel, int hfrGroupCount, int bandsPerHfrGroup,
-                                             int stereoBandCount, int baseBandCount, int totalBandCount, int version)
+                                             int stereoBandCount, int baseBandCount, int totalBandCount, int version, int subframe)
         {
             if (bandsPerHfrGroup == 0) return;
             if (channel.Type == ChannelType.StereoSecondary) return;
@@ -453,14 +472,14 @@ namespace ClHcaSharp
                     int scIndex = hfrScales[hfrScalesOffset + group];
                     scIndex &= ~(scIndex >> 31);
 
-                    channel.Spectra[highBand] = GetScaleConversionTableValue(scIndex) * channel.Spectra[lowBand];
+                    channel.Spectra[subframe][highBand] = GetScaleConversionTableValue(scIndex) * channel.Spectra[subframe][lowBand];
 
                     highBand++;
                     lowBand -= lowBandSub;
                 }
             }
 
-            channel.Spectra[highBand - 1] = 0.0f;
+            channel.Spectra[subframe][highBand - 1] = 0.0f;
         }
 
         private static void ApplyIntensityStereo(Channel[] channelPair, int channelOffset, int subframe, int baseBandCount, int totalBandCount)
@@ -469,8 +488,8 @@ namespace ClHcaSharp
 
             float ratioL = GetIntensityRatioTableValue(channelPair[channelOffset + 1].Intensity[subframe]);
             float ratioR = 2.0f - ratioL;
-            float[] spectraL = channelPair[channelOffset + 0].Spectra;
-            float[] spectraR = channelPair[channelOffset + 1].Spectra;
+            float[] spectraL = channelPair[channelOffset + 0].Spectra[subframe];
+            float[] spectraR = channelPair[channelOffset + 1].Spectra[subframe];
 
             for (int band = baseBandCount; band < totalBandCount; band++)
             {
@@ -481,14 +500,14 @@ namespace ClHcaSharp
             }
         }
 
-        private static void ApplyMsStereo(Channel[] channelPair, int channelOffset, int msStereo, int baseBandCount, int totalBandCount)
+        private static void ApplyMsStereo(Channel[] channelPair, int channelOffset, int msStereo, int baseBandCount, int totalBandCount, int subframe)
         {
             if (msStereo != 0) return;
             if (channelPair[channelOffset + 0].Type != ChannelType.StereoPrimary) return;
 
             float ratio = MsStereoRatio;
-            float[] spectraL = channelPair[channelOffset + 0].Spectra;
-            float[] spectraR = channelPair[channelOffset + 1].Spectra;
+            float[] spectraL = channelPair[channelOffset + 0].Spectra[subframe];
+            float[] spectraR = channelPair[channelOffset + 1].Spectra[subframe];
 
             for (int band = baseBandCount; band < totalBandCount; band++)
             {
@@ -507,7 +526,7 @@ namespace ClHcaSharp
 
             int count1 = 1;
             int count2 = half;
-            float[] temp1 = channel.Spectra;
+            float[] temp1 = channel.Spectra[subframe];
             float[] temp2 = channel.Temp;
             int temp1Index = 0;
 
@@ -544,7 +563,7 @@ namespace ClHcaSharp
             count1 = half;
             count2 = 1;
             temp1 = channel.Temp;
-            temp2 = channel.Spectra;
+            temp2 = channel.Spectra[subframe];
 
             for (int i = 0; i < mdctBits; i++)
             {
@@ -585,7 +604,7 @@ namespace ClHcaSharp
                 count2 <<= 1;
             }
 
-            float[] dct = channel.Spectra;
+            float[] dct = channel.Spectra[subframe];
             float[] prev = channel.ImdctPrevious;
             for (int i = 0; i < half; i++)
             {
