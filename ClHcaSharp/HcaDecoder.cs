@@ -47,6 +47,93 @@ namespace ClHcaSharp
             hca.CipherTable = Cipher.Init(hca.CiphType, hca.KeyCode);
         }
 
+        public int TestBlock(byte[] data)
+        {
+            const int frameSamples = Subframes * SamplesPerSubframe;
+            const float scale = 32768.0f;
+
+            int status;
+            int clips = 0;
+            int blanks = 0;
+            int[] channelBlanks = new int[MaxChannels];
+
+            byte[] buffer = data;
+
+            {
+                bool isEmpty = true;
+
+                for (int i = 0x02; i < data.Length - 0x02; i++)
+                {
+                    if (buffer[i] != 0)
+                    {
+                        isEmpty = false;
+                        break;
+                    }
+                }
+
+                if (isEmpty) return 0;
+            }
+
+            status = DecodeBlockUnpack(data);
+            if (status < 0) return -1;
+
+            {
+                int bitsMax = hca.FrameSize * 8;
+                int byteStart;
+
+                if (status + 14 > bitsMax)
+                    throw new Exception("BitReader exception.");
+
+                byteStart = (status / 8) + (status % 8 > 0 ? 0x01 : 0);
+
+                for (int i = byteStart; i < hca.FrameSize - 0x02; i++)
+                {
+                    if (buffer[i] != 0)
+                        return -1;
+                }
+            }
+
+            DecodeBlockTransform();
+            for (int ch = 0; ch < hca.ChannelCount; ch++)
+            {
+                for (int sf = 0; sf < Subframes; sf++)
+                {
+                    for (int s = 0; s < SamplesPerFrame; s++)
+                    {
+                        float fSample = hca.Channels[ch].Wave[sf][s];
+
+                        if (fSample > 1.0f || fSample < -1.0f)
+                            clips++;
+                        else
+                        {
+                            int pSample = (int)(fSample * scale);
+                            if (pSample == 0 || pSample == -1)
+                            {
+                                blanks++;
+                                channelBlanks[ch]++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (clips == 1)
+                clips++;
+            if (clips > 1)
+                return clips;
+
+            if (blanks == hca.ChannelCount * frameSamples)
+                return 0;
+
+            if (hca.ChannelCount >= 2)
+            {
+                if (channelBlanks[0] == frameSamples && channelBlanks[1] != frameSamples)
+                    return 3;
+            }
+
+            return 1;
+        }
+
         public void ReadSamples16(short[][] samples)
         {
             for (int subframe = 0; subframe < Subframes; subframe++)
@@ -103,7 +190,18 @@ namespace ClHcaSharp
             }
         }
 
-        public int DecodeBlockUnpack(byte[] data)
+        public int DecodeBlock(byte[] data)
+        {
+            int result = DecodeBlockUnpack(data);
+
+            if (result < 0) return result;
+
+            DecodeBlockTransform();
+
+            return result;
+        }
+
+        private int DecodeBlockUnpack(byte[] data)
         {
             if (data.Length < hca.FrameSize)
                 throw new ArgumentException("Data is less than expected frame size.");
@@ -141,7 +239,7 @@ namespace ClHcaSharp
             return bitReader.Bit;
         }
 
-        public void DecodeBlockTransform()
+        private void DecodeBlockTransform()
         {
             for (int subframe = 0; subframe < Subframes; subframe++)
             {
@@ -168,17 +266,6 @@ namespace ClHcaSharp
                     ImdctTransform(hca.Channels[channel], subframe);
                 }
             }
-        }
-
-        public int DecodeBlock(byte[] data)
-        {
-            int result = DecodeBlockUnpack(data);
-
-            if (result < 0) return result;
-
-            DecodeBlockTransform();
-
-            return result;
         }
 
         private static void UnpackScaleFactors(Channel channel, BitReader bitReader, int hfrGroupCount, int version)
