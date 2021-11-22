@@ -98,7 +98,7 @@ namespace ClHcaSharp
             {
                 for (int sf = 0; sf < Subframes; sf++)
                 {
-                    for (int s = 0; s < SamplesPerFrame; s++)
+                    for (int s = 0; s < SamplesPerSubframe; s++)
                     {
                         float fSample = hca.Channels[ch].Wave[sf][s];
 
