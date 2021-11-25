@@ -82,7 +82,8 @@ namespace ClHcaSharp
                 int byteStart;
 
                 if (status + 14 > bitsMax)
-                    throw new Exception("BitReader exception.");
+                    return -1;
+                    //throw new Exception("BitReader error.");
 
                 byteStart = (status / 8) + (status % 8 > 0 ? 0x01 : 0);
 
@@ -281,7 +282,9 @@ namespace ClHcaSharp
                 extraCount = hfrGroupCount;
                 csCount += extraCount;
 
-                if (csCount > SamplesPerSubframe) throw new InvalidDataException("Invalid scale count.");
+                if (csCount > SamplesPerSubframe)
+                    return;
+                    //throw new InvalidDataException("Invalid scale count.");
             }
 
             if (deltaBits >= 6)
@@ -307,7 +310,8 @@ namespace ClHcaSharp
                     {
                         int scaleFactorTest = value + (delta - (expectedDelta >> 1));
                         if (scaleFactorTest < 0 || scaleFactorTest >= 64)
-                            throw new InvalidDataException("Invalid scale factor.");
+                            return;
+                            //throw new InvalidDataException("Invalid scale factor.");
 
                         value = (byte)(value - (expectedDelta >> 1) + delta);
                         value = (byte)(value & 0x3F);
@@ -380,7 +384,8 @@ namespace ClHcaSharp
                                 {
                                     value = (byte)(value - (bMax >> 1) + delta);
                                     if (value > 15)
-                                        throw new InvalidDataException("Intensity value out of range.");
+                                        return;
+                                        //throw new InvalidDataException("Intensity value out of range.");
                                 }
 
                                 channel.Intensity[i] = value;
