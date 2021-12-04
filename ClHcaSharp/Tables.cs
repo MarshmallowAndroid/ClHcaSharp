@@ -4,6 +4,54 @@ namespace ClHcaSharp
 {
     internal static class Tables
     {
+        public static void InitializeTables()
+        {
+            for (int i = 0; i < DequantizerScalingTableHex.Length; i++)
+            {
+                DequantizerScalingTable[i] = BitConverter.Int32BitsToSingle((int)DequantizerScalingTableHex[i]);
+            }
+
+            for (int i = 0; i < DequantizerRangeTableHex.Length; i++)
+            {
+                DequantizerRangeTable[i] = BitConverter.Int32BitsToSingle((int)DequantizerRangeTableHex[i]);
+            }
+
+            for (int i = 0; i < ScaleConversionTableHex.Length; i++)
+            {
+                ScaleConversionTable[i] = BitConverter.Int32BitsToSingle((int)ScaleConversionTableHex[i]);
+            }
+
+            for (int i = 0; i < IntensityRatioTableHex.Length; i++)
+            {
+                IntensityRatioTable[i] = BitConverter.Int32BitsToSingle((int)IntensityRatioTableHex[i]);
+            }
+
+            for (int i = 0; i < SinTableHex.Length; i++)
+            {
+                SinTable[i] = new float[64];
+
+                for (int j = 0; j < SinTableHex[i].Length; j++)
+                {
+                    SinTable[i][j] = BitConverter.Int32BitsToSingle((int)SinTableHex[i][j]);
+                }
+            }
+
+            for (int i = 0; i < CosTableHex.Length; i++)
+            {
+                CosTable[i] = new float[64];
+
+                for (int j = 0; j < CosTableHex[i].Length; j++)
+                {
+                    CosTable[i][j] = BitConverter.Int32BitsToSingle((int)CosTableHex[i][j]);
+                }
+            }
+
+            for (int i = 0; i < ImdctWindowHex.Length; i++)
+            {
+                ImdctWindow[i] = BitConverter.Int32BitsToSingle((int)ImdctWindowHex[i]);
+            }
+        }
+
         public static readonly byte[] InvertTable = new byte[66]
         {
             14, 14, 14, 14, 14, 14, 13, 13, 13, 13, 13, 13, 12, 12, 12, 12,
@@ -25,7 +73,8 @@ namespace ClHcaSharp
             0x3FC238D2, 0x400164D2, 0x402C6897, 0x4065B907, 0x40990B88, 0x40CBEC15, 0x4107DB35, 0x413504F3
         };
 
-        public static float GetDequantizerScalingTableValue(int index) => BitConverter.Int32BitsToSingle((int)DequantizerScalingTableHex[index]);
+        public static readonly float[] DequantizerScalingTable = new float[64];
+
 
         public static readonly uint[] DequantizerRangeTableHex = new uint[16]
         {
@@ -33,7 +82,7 @@ namespace ClHcaSharp
             0x3D842108, 0x3D020821, 0x3C810204, 0x3C008081, 0x3B804020, 0x3B002008, 0x3A801002, 0x3A000801
         };
 
-        public static float GetDequantizerRangeTableValue(int index) => BitConverter.Int32BitsToSingle((int)DequantizerRangeTableHex[index]);
+        public static readonly float[] DequantizerRangeTable = new float[16];
 
         public static readonly byte[] MaxBitTable = new byte[16]
         {
@@ -84,7 +133,7 @@ namespace ClHcaSharp
             0x4B4238D2, 0x4B8164D2, 0x4BAC6897, 0x4BE5B907, 0x4C190B88, 0x4C4BEC15, 0x00000000, 0x00000000
         };
 
-        public static float GetScaleConversionTableValue(int index) => BitConverter.Int32BitsToSingle((int)ScaleConversionTableHex[index]);
+        public static float[] ScaleConversionTable = new float[128];
 
         public static readonly uint[] IntensityRatioTableHex = new uint[16]
         {
@@ -92,9 +141,9 @@ namespace ClHcaSharp
             0x3F5B6DB7, 0x3F36DB6E, 0x3F124925, 0x3EDB6DB7, 0x3E924925, 0x3E124925, 0x00000000, 0x00000000
         };
 
-        public static float GetIntensityRatioTableValue(int index) => BitConverter.Int32BitsToSingle((int)IntensityRatioTableHex[index]);
+        public static float[] IntensityRatioTable = new float[16];
 
-        public static readonly uint[][] SinTablesHex = new uint[7][]
+        public static readonly uint[][] SinTableHex = new uint[7][]
         {
             new uint[64]
             {
@@ -175,9 +224,9 @@ namespace ClHcaSharp
             }
         };
 
-        public static float GetSinTableValue(int tableIndex, int offset) => BitConverter.Int32BitsToSingle((int)SinTablesHex[tableIndex][offset]);
+        public static float[][] SinTable = new float[7][];
 
-        public static readonly uint[][] CosTablesHex = new uint[7][]
+        public static readonly uint[][] CosTableHex = new uint[7][]
         {
             new uint[64]
             {
@@ -258,7 +307,7 @@ namespace ClHcaSharp
             }
         };
 
-        public static float GetCosTableValue(int tableIndex, int offset) => BitConverter.Int32BitsToSingle((int)CosTablesHex[tableIndex][offset]);
+        public static float[][] CosTable = new float[7][];
 
         public static readonly uint[] ImdctWindowHex = new uint[128]
         {
@@ -280,6 +329,6 @@ namespace ClHcaSharp
             0xBF7FF688, 0xBF7FF9D0, 0xBF7FFC32, 0xBF7FFDDA, 0xBF7FFEED, 0xBF7FFF8F, 0xBF7FFFDF, 0xBF7FFFFC
         };
 
-        public static float GetImdctWindowValue(int index) => BitConverter.Int32BitsToSingle((int)ImdctWindowHex[index]);
+        public static float[] ImdctWindow = new float[128];
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using static ClHcaSharp.Constants;
+using static ClHcaSharp.Header;
 using static ClHcaSharp.Tables;
 
 namespace ClHcaSharp
@@ -13,7 +14,9 @@ namespace ClHcaSharp
         {
             hca = new HcaContext();
 
-            Header.DecodeHeader(hca, hcaStream);
+            InitializeTables();
+
+            DecodeHeader(hca, hcaStream);
             SetKey(key);
         }
 
@@ -378,8 +381,8 @@ namespace ClHcaSharp
             int cgCount = channel.CodedCount;
             for (int i = 0; i < cgCount; i++)
             {
-                float scaleFactorScale = GetDequantizerScalingTableValue(channel.ScaleFactors[i]);
-                float resolutionScale = GetDequantizerRangeTableValue(channel.Resolution[i]);
+                float scaleFactorScale = DequantizerScalingTable[channel.ScaleFactors[i]];
+                float resolutionScale = DequantizerRangeTable[channel.Resolution[i]];
                 channel.Gain[i] = scaleFactorScale * resolutionScale;
             }
         }
@@ -435,7 +438,7 @@ namespace ClHcaSharp
                 int sfValid = channel.ScaleFactors[validIndex];
                 int scIndex = (sfNoise - sfValid + 62) & ~((sfNoise - sfValid + 62) >> 31);
 
-                channel.Spectra[subframe][noiseIndex] = GetScaleConversionTableValue(scIndex) * channel.Spectra[subframe][validIndex];
+                channel.Spectra[subframe][noiseIndex] = ScaleConversionTable[scIndex] * channel.Spectra[subframe][validIndex];
             }
         }
 
@@ -472,7 +475,7 @@ namespace ClHcaSharp
                     int scIndex = hfrScales[hfrScalesOffset + group];
                     scIndex &= ~(scIndex >> 31);
 
-                    channel.Spectra[subframe][highBand] = GetScaleConversionTableValue(scIndex) * channel.Spectra[subframe][lowBand];
+                    channel.Spectra[subframe][highBand] = ScaleConversionTable[scIndex] * channel.Spectra[subframe][lowBand];
 
                     highBand++;
                     lowBand -= lowBandSub;
@@ -486,7 +489,7 @@ namespace ClHcaSharp
         {
             if (channelPair[channelOffset + 0].Type != ChannelType.StereoPrimary) return;
 
-            float ratioL = GetIntensityRatioTableValue(channelPair[channelOffset + 1].Intensity[subframe]);
+            float ratioL = IntensityRatioTable[channelPair[channelOffset + 1].Intensity[subframe]];
             float ratioR = 2.0f - ratioL;
             float[] spectraL = channelPair[channelOffset + 0].Spectra[subframe];
             float[] spectraR = channelPair[channelOffset + 1].Spectra[subframe];
@@ -584,8 +587,8 @@ namespace ClHcaSharp
                     {
                         float a = s[s1Index++];
                         float b = s[s2Index++];
-                        float sin = GetSinTableValue(i, sinTableIndex++);
-                        float cos = GetCosTableValue(i, cosTableIndex++);
+                        float sin = SinTable[i][sinTableIndex++];
+                        float cos = CosTable[i][cosTableIndex++];
                         d[d1Index++] = a * sin - b * cos;
                         d[d2Index--] = a * cos + b * sin;
                     }
@@ -608,10 +611,10 @@ namespace ClHcaSharp
             float[] prev = channel.ImdctPrevious;
             for (int i = 0; i < half; i++)
             {
-                channel.Wave[subframe][i] = GetImdctWindowValue(i) * dct[i + half] + prev[i];
-                channel.Wave[subframe][i + half] = GetImdctWindowValue(i + half) * dct[size - 1 - i] - prev[i + half];
-                channel.ImdctPrevious[i] = GetImdctWindowValue(size - 1 - i) * dct[half - i - 1];
-                channel.ImdctPrevious[i + half] = GetImdctWindowValue(half - i - 1) * dct[i];
+                channel.Wave[subframe][i] = ImdctWindow[i] * dct[i + half] + prev[i];
+                channel.Wave[subframe][i + half] = ImdctWindow[i + half] * dct[size - 1 - i] - prev[i + half];
+                channel.ImdctPrevious[i] = ImdctWindow[size - 1 - i] * dct[half - i - 1];
+                channel.ImdctPrevious[i + half] = ImdctWindow[half - i - 1] * dct[i];
             }
         }
     }
