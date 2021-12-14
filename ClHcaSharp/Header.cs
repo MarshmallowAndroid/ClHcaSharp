@@ -52,13 +52,13 @@ namespace ClHcaSharp
                 hca.EncoderDelay = bitReader.Read(16);
                 hca.EncoderPadding = bitReader.Read(16);
 
-                if (hca.ChannelCount < MinChannels || hca.ChannelCount > MaxChannels)
+                if (!(hca.ChannelCount >= MinChannels && hca.ChannelCount <= MaxChannels))
                     throw new InvalidDataException("Invalid channel count.");
 
                 if (hca.FrameCount == 0)
                     throw new InvalidDataException("Frame count is zero.");
 
-                if (hca.SampleRate < MinSampleRate || hca.SampleRate > MaxSampleRate)
+                if (!(hca.SampleRate >= MinSampleRate && hca.SampleRate <= MaxSampleRate))
                     throw new InvalidDataException("Invalid sample rate.");
 
                 headerSize -= 16;
@@ -108,7 +108,7 @@ namespace ClHcaSharp
                 hca.VbrMaxFrameSize = bitReader.Read(16);
                 hca.VbrNoiseLevel = bitReader.Read(16);
 
-                if (hca.FrameSize != 0 || hca.VbrMaxFrameSize <= 8 || hca.VbrMaxFrameSize > 0x1FF)
+                if (!(hca.FrameSize == 0 && hca.VbrMaxFrameSize > 8 && hca.VbrMaxFrameSize <= 0x1FF))
                     throw new InvalidDataException("Invalid frame size.");
 
                 headerSize -= 8;
@@ -131,7 +131,8 @@ namespace ClHcaSharp
 
                 hca.LoopFlag = true;
 
-                if (hca.LoopStartFrame < 0 || hca.LoopStartFrame > hca.LoopEndFrame || hca.LoopEndFrame >= hca.FrameCount)
+                if (!(hca.LoopStartFrame >= 0 && hca.LoopStartFrame <= hca.LoopEndFrame
+                    && hca.LoopEndFrame < hca.FrameCount))
                     throw new InvalidDataException("Invalid loop frames.");
 
                 headerSize -= 16;
@@ -151,7 +152,7 @@ namespace ClHcaSharp
                 bitReader.Skip(32);
                 hca.CiphType = bitReader.Read(16);
 
-                if (hca.CiphType != 0 && hca.CiphType != 1 && hca.CiphType != 56)
+                if (!(hca.CiphType == 0 || hca.CiphType == 1 || hca.CiphType == 56))
                     throw new InvalidDataException("Invalid cipher type.");
 
                 headerSize -= 6;
@@ -182,6 +183,8 @@ namespace ClHcaSharp
                 }
 
                 hca.Comment = commentStringBuilder.ToString();
+
+                //headerSize -= 5 + hca.CommentLength;
             }
             else hca.CommentLength = 0;
 
