@@ -82,7 +82,7 @@ namespace ClHcaSharp
 
                 headerSize -= 16;
             }
-            else if (headerSize >= 0x0c && (bitReader.Peek(32) & Mask) == StringToUInt32("dec"))
+            else if (headerSize >= 12 && (bitReader.Peek(32) & Mask) == StringToUInt32("dec"))
             {
                 bitReader.Skip(32);
                 hca.FrameSize = bitReader.Read(16);
@@ -108,10 +108,15 @@ namespace ClHcaSharp
                 hca.VbrMaxFrameSize = bitReader.Read(16);
                 hca.VbrNoiseLevel = bitReader.Read(16);
 
-                if (hca.FrameSize != 0 || hca.VbrMaxFrameSize <= 8 || hca.VbrMaxFrameSize > 0x1FF)
+                if (hca.FrameSize != 0 || hca.VbrMaxFrameSize <= 8 || hca.VbrMaxFrameSize > 511)
                     throw new InvalidDataException("Invalid frame size.");
 
                 headerSize -= 8;
+            }
+            else
+            {
+                hca.VbrMaxFrameSize = 0;
+                hca.VbrNoiseLevel = 0;
             }
 
             if (headerSize >= 6 && (bitReader.Peek(32) & Mask) == StringToUInt32("ath"))
