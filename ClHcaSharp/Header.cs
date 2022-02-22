@@ -108,7 +108,7 @@ namespace ClHcaSharp
                 hca.VbrMaxFrameSize = bitReader.Read(16);
                 hca.VbrNoiseLevel = bitReader.Read(16);
 
-                if (!(hca.FrameSize == 0 && hca.VbrMaxFrameSize > 8 && hca.VbrMaxFrameSize <= 0x1FF))
+                if (!(hca.FrameSize == 0 && hca.VbrMaxFrameSize > 8 && hca.VbrMaxFrameSize <= 511))
                     throw new InvalidDataException("Invalid frame size.");
 
                 headerSize -= 8;
