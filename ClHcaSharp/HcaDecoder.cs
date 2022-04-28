@@ -646,7 +646,7 @@ namespace ClHcaSharp
                     d2Index += count2;
                 }
 
-                temp1Index = 0;
+                temp1Index -= SamplesPerSubframe;
                 swap = temp1;
                 temp1 = temp2;
                 temp2 = swap;
