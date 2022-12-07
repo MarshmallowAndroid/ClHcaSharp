@@ -53,7 +53,7 @@ namespace ClHcaSharp
         public int TestBlock(byte[] data)
         {
             const int frameSamples = Subframes * SamplesPerSubframe;
-            const float scale = 32768.0f;
+            const float scale = 32768.0F;
 
             int status;
             int clips = 0;
@@ -106,7 +106,7 @@ namespace ClHcaSharp
                     {
                         float fSample = hca.Channels[ch].Wave[sf][s];
 
-                        if (fSample > 1.0f || fSample < -1.0f)
+                        if (fSample > 1.0F || fSample < -1.0F)
                             clips++;
                         else
                         {
@@ -574,7 +574,7 @@ namespace ClHcaSharp
                 }
             }
 
-            channel.Spectra[subframe][highBand - 1] = 0.0f;
+            channel.Spectra[subframe][highBand - 1] = 0.0F;
         }
 
         private static void ApplyIntensityStereo(Channel[] channelPair, int channelOffset, int subframe, int baseBandCount, int totalBandCount)
@@ -582,7 +582,7 @@ namespace ClHcaSharp
             if (channelPair[channelOffset + 0].Type != ChannelType.StereoPrimary) return;
 
             float ratioL = IntensityRatioTable[channelPair[channelOffset + 1].Intensity[subframe]];
-            float ratioR = 2.0f - ratioL;
+            float ratioR = 2.0F - ratioL;
             float[] spectraL = channelPair[channelOffset + 0].Spectra[subframe];
             float[] spectraR = channelPair[channelOffset + 1].Spectra[subframe];
 

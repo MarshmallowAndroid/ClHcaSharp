@@ -171,7 +171,7 @@ namespace ClHcaSharp
 
                 headerSize -= 8;
             }
-            else hca.RvaVolume = 1.0f;
+            else hca.RvaVolume = 1.0F;
 
             if (headerSize >= 5 && (bitReader.Peek(32) & Mask) == StringToUInt32("comm"))
             {
