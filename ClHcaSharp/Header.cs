@@ -227,7 +227,7 @@ namespace ClHcaSharp
             hca.CipherTable = Cipher.Init(hca.CiphType, hca.KeyCode);
 
             int channelsPerTrack = hca.ChannelCount / hca.TrackCount;
-            ChannelType[] channelTypes = new ChannelType[channelsPerTrack];
+            ChannelType[] channelTypes = new ChannelType[MaxChannels];
 
             for (int i = 0; i < channelTypes.Length; i++)
             {
