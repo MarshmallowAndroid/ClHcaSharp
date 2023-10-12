@@ -16,7 +16,7 @@
         public int LoopStartDelay { get; set; }
         public int LoopEndPadding { get; set; }
         public int SamplesPerBlock { get; set; }
-        public string Comment { get; set; }
+        public string Comment { get; set; } = "";
         public bool EncryptionEnabled { get; set; }
 
         public int SampleCount => BlockCount * SamplesPerBlock - EncoderDelay - EncoderPadding;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 using static ClHcaSharp.Constants;
-using static ClHcaSharp.Header;
+//using static ClHcaSharp.Header;
 using static ClHcaSharp.Tables;
 
 namespace ClHcaSharp
@@ -12,17 +12,12 @@ namespace ClHcaSharp
 
         public HcaDecoder(Stream hcaStream, ulong key)
         {
-            hca = new HcaContext();
-
             InitializeTables();
 
-            DecodeHeader(hca, hcaStream);
-            SetKey(key);
-        }
+            hca = new HcaContext(hcaStream);
+            hca.SetKey(key);
 
-        public HcaInfo GetInfo()
-        {
-            HcaInfo info = new()
+            HcaInfo = new()
             {
                 Version = hca.Version,
                 HeaderSize = hca.HeaderSize,
@@ -41,17 +36,14 @@ namespace ClHcaSharp
                 Comment = hca.Comment,
                 EncryptionEnabled = hca.CiphType == 56
             };
-            return info;
         }
 
-        public void SetKey(ulong key)
-        {
-            hca.KeyCode = key;
-            hca.CipherTable = Cipher.Init(hca.CiphType, hca.KeyCode);
-        }
+        public HcaInfo HcaInfo { get; }
 
         public int TestBlock(byte[] data)
         {
+            if (hca.Channels is null) return -1;
+
             const int frameSamples = Subframes * SamplesPerSubframe;
             const float scale = 32768.0F;
 
@@ -86,7 +78,7 @@ namespace ClHcaSharp
 
                 if (status + 14 > bitsMax)
                     return -1;
-                    //throw new Exception("BitReader error.");
+                //throw new Exception("BitReader error.");
 
                 byteStart = (status / 8) + (status % 8 > 0 ? 0x01 : 0);
 
@@ -181,27 +173,21 @@ namespace ClHcaSharp
 
         public void DecodeReset()
         {
-            if (hca != null)
+            hca.Random = DefaultRandom;
+
+            for (int i = 0; i < hca.ChannelCount; i++)
             {
-                hca.Random = DefaultRandom;
+                Channel channel = hca.Channels[i];
 
-                for (int i = 0; i < hca.ChannelCount; i++)
-                {
-                    Channel channel = hca.Channels[i];
-
-                    Array.Clear(channel.ImdctPrevious, 0, channel.ImdctPrevious.Length);
-                }
+                Array.Clear(channel.ImdctPrevious, 0, channel.ImdctPrevious.Length);
             }
         }
 
         public int DecodeBlock(byte[] data)
         {
             int result = DecodeBlockUnpack(data);
-
             if (result < 0) return result;
-
             DecodeBlockTransform();
-
             return result;
         }
 
@@ -287,7 +273,7 @@ namespace ClHcaSharp
 
                 if (csCount > SamplesPerSubframe)
                     return;
-                    //throw new InvalidDataException("Invalid scale count.");
+                //throw new InvalidDataException("Invalid scale count.");
             }
 
             if (deltaBits >= 6)
@@ -314,7 +300,7 @@ namespace ClHcaSharp
                         int scaleFactorTest = value + (delta - (expectedDelta >> 1));
                         if (scaleFactorTest < 0 || scaleFactorTest >= 64)
                             return;
-                            //throw new InvalidDataException("Invalid scale factor.");
+                        //throw new InvalidDataException("Invalid scale factor.");
 
                         value = (byte)(value - (expectedDelta >> 1) + delta);
                         value = (byte)(value & 0x3F);
@@ -388,7 +374,7 @@ namespace ClHcaSharp
                                     value = (byte)(value - (bMax >> 1) + delta);
                                     if (value > 15)
                                         return;
-                                        //throw new InvalidDataException("Intensity value out of range.");
+                                    //throw new InvalidDataException("Intensity value out of range.");
                                 }
 
                                 channel.Intensity[i] = value;

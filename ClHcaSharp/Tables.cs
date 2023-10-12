@@ -4,8 +4,12 @@ namespace ClHcaSharp
 {
     internal static class Tables
     {
+        private static bool initialized = false;
+
         public static void InitializeTables()
         {
+            if (initialized) return;
+
             for (int i = 0; i < DequantizerScalingTableHex.Length; i++)
             {
                 DequantizerScalingTable[i] = BitConverter.Int32BitsToSingle((int)DequantizerScalingTableHex[i]);
@@ -50,6 +54,8 @@ namespace ClHcaSharp
             {
                 ImdctWindow[i] = BitConverter.Int32BitsToSingle((int)ImdctWindowHex[i]);
             }
+
+            initialized = true;
         }
 
         public static readonly byte[] InvertTable = new byte[66]
