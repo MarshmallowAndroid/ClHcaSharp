@@ -16,13 +16,17 @@ namespace ClHcaSharp
         {
             if (type == 56 && keyCode == 0) type = 0;
 
-            return type switch
+            switch (type)
             {
-                0 => Init0(),
-                1 => Init1(),
-                56 => Init56(keyCode),
-                _ => throw new ArgumentException("Invalid cipher type."),
-            };
+                case 0:
+                    return Init0();
+                case 1:
+                    return Init1();
+                case 56:
+                    return Init56(keyCode);
+                default:
+                    throw new ArgumentException("Invalid cipher type.");
+            }
         }
 
         private static byte[] Init0()

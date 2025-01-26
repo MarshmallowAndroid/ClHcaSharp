@@ -46,47 +46,47 @@
 
             uint value = 0;
 
-            if (bit + bits <= size)
+            if (bit + bits > size)
             {
-                int bitOffset = bits + bitsRemaining;
-                int bitLeft = size - bit;
-
-                if (bitLeft >= 32 && bitOffset >= 25)
-                {
-                    int dataOffset = bit >> 3;
-                    value = data[dataOffset];
-                    value = (value << 8) | data[dataOffset + 1];
-                    value = (value << 8) | data[dataOffset + 2];
-                    value = (value << 8) | data[dataOffset + 3];
-                    value &= mask32[bitsRemaining];
-                    value >>= 32 - bitsRemaining - bits;
-                }
-                else if (bitLeft >= 24 && bitOffset >= 17)
-                {
-                    int dataOffset = bit >> 3;
-                    value = data[dataOffset];
-                    value = (value << 8) | data[dataOffset + 1];
-                    value = (value << 8) | data[dataOffset + 2];
-                    value &= mask24[bitsRemaining];
-                    value >>= 24 - bitsRemaining - bits;
-                }
-                else if (bitLeft >= 16 && bitOffset >= 9)
-                {
-                    int dataOffset = bit >> 3;
-                    value = data[dataOffset];
-                    value = (value << 8) | data[dataOffset + 1];
-                    value &= mask16[bitsRemaining];
-                    value >>= 16 - bitsRemaining - bits;
-                }
-                else
-                {
-                    int dataOffset = bit >> 3;
-                    value = data[dataOffset];
-                    value &= mask8[bitsRemaining];
-                    value >>= 8 - bitsRemaining - bits;
-                }
-
                 return (int)value;
+            }
+
+            int bitOffset = bits + bitsRemaining;
+            int bitLeft = size - bit;
+
+            if (bitLeft >= 32 && bitOffset >= 25)
+            {
+                int dataOffset = bit >> 3;
+                value = data[dataOffset];
+                value = (value << 8) | data[dataOffset + 1];
+                value = (value << 8) | data[dataOffset + 2];
+                value = (value << 8) | data[dataOffset + 3];
+                value &= mask32[bitsRemaining];
+                value >>= 32 - bitsRemaining - bits;
+            }
+            else if (bitLeft >= 24 && bitOffset >= 17)
+            {
+                int dataOffset = bit >> 3;
+                value = data[dataOffset];
+                value = (value << 8) | data[dataOffset + 1];
+                value = (value << 8) | data[dataOffset + 2];
+                value &= mask24[bitsRemaining];
+                value >>= 24 - bitsRemaining - bits;
+            }
+            else if (bitLeft >= 16 && bitOffset >= 9)
+            {
+                int dataOffset = bit >> 3;
+                value = data[dataOffset];
+                value = (value << 8) | data[dataOffset + 1];
+                value &= mask16[bitsRemaining];
+                value >>= 16 - bitsRemaining - bits;
+            }
+            else
+            {
+                int dataOffset = bit >> 3;
+                value = data[dataOffset];
+                value &= mask8[bitsRemaining];
+                value >>= 8 - bitsRemaining - bits;
             }
 
             return (int)value;

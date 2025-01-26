@@ -17,7 +17,7 @@ namespace ClHcaSharp
             hca = new HcaContext(hcaStream);
             hca.SetKey(key);
 
-            HcaInfo = new()
+            HcaInfo = new HcaInfo()
             {
                 Version = hca.Version,
                 HeaderSize = hca.HeaderSize,
@@ -196,7 +196,7 @@ namespace ClHcaSharp
             if (data.Length < hca.FrameSize)
                 throw new ArgumentException("Data is less than expected frame size.");
 
-            BitReader bitReader = new(data);
+            BitReader bitReader = new BitReader(data);
 
             ushort sync = (ushort)bitReader.Read(16);
             if (sync != 0xFFFF) throw new InvalidDataException("Sync error.");

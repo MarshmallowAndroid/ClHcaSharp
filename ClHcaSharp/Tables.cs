@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 
 namespace ClHcaSharp
 {
@@ -6,28 +7,29 @@ namespace ClHcaSharp
     {
         private static bool initialized = false;
 
+
         public static void InitializeTables()
         {
             if (initialized) return;
 
             for (int i = 0; i < DequantizerScalingTableHex.Length; i++)
             {
-                DequantizerScalingTable[i] = BitConverter.Int32BitsToSingle((int)DequantizerScalingTableHex[i]);
+                DequantizerScalingTable[i] = Util.UInt32ToSingle(DequantizerScalingTableHex[i]);
             }
 
             for (int i = 0; i < DequantizerRangeTableHex.Length; i++)
             {
-                DequantizerRangeTable[i] = BitConverter.Int32BitsToSingle((int)DequantizerRangeTableHex[i]);
+                DequantizerRangeTable[i] = Util.UInt32ToSingle(DequantizerRangeTableHex[i]);
             }
 
             for (int i = 0; i < ScaleConversionTableHex.Length; i++)
             {
-                ScaleConversionTable[i] = BitConverter.Int32BitsToSingle((int)ScaleConversionTableHex[i]);
+                ScaleConversionTable[i] = Util.UInt32ToSingle(ScaleConversionTableHex[i]);
             }
 
             for (int i = 0; i < IntensityRatioTableHex.Length; i++)
             {
-                IntensityRatioTable[i] = BitConverter.Int32BitsToSingle((int)IntensityRatioTableHex[i]);
+                IntensityRatioTable[i] = Util.UInt32ToSingle(IntensityRatioTableHex[i]);
             }
 
             for (int i = 0; i < SinTableHex.Length; i++)
@@ -36,7 +38,7 @@ namespace ClHcaSharp
 
                 for (int j = 0; j < SinTableHex[i].Length; j++)
                 {
-                    SinTable[i][j] = BitConverter.Int32BitsToSingle((int)SinTableHex[i][j]);
+                    SinTable[i][j] = Util.UInt32ToSingle(SinTableHex[i][j]);
                 }
             }
 
@@ -46,13 +48,13 @@ namespace ClHcaSharp
 
                 for (int j = 0; j < CosTableHex[i].Length; j++)
                 {
-                    CosTable[i][j] = BitConverter.Int32BitsToSingle((int)CosTableHex[i][j]);
+                    CosTable[i][j] = Util.UInt32ToSingle(CosTableHex[i][j]);
                 }
             }
 
             for (int i = 0; i < ImdctWindowHex.Length; i++)
             {
-                ImdctWindow[i] = BitConverter.Int32BitsToSingle((int)ImdctWindowHex[i]);
+                ImdctWindow[i] = Util.UInt32ToSingle(ImdctWindowHex[i]);
             }
 
             initialized = true;

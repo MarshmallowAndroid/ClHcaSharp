@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.IO;
+using System.Text;
 using static ClHcaSharp.Constants;
 
 namespace ClHcaSharp
@@ -10,10 +12,10 @@ namespace ClHcaSharp
             if (!IsHeaderValid(hcaStream, out int headerSize))
                 throw new Exception("Invalid HCA header.");
 
-            BinaryReader binaryReader = new(hcaStream);
+            BinaryReader binaryReader = new BinaryReader(hcaStream);
             binaryReader.BaseStream.Position = 0;
 
-            BitReader bitReader = new(binaryReader.ReadBytes((int)headerSize));
+            BitReader bitReader = new BitReader(binaryReader.ReadBytes(headerSize));
 
             if ((bitReader.Peek(32) & Mask) == StringToUInt32("HCA"))
             {
@@ -147,7 +149,7 @@ namespace ClHcaSharp
             {
                 bitReader.Skip(32);
                 int rvaVolumeInt = bitReader.Read(32);
-                RvaVolume = BitConverter.ToSingle(BitConverter.GetBytes(rvaVolumeInt));
+                RvaVolume = Util.UInt32ToSingle((uint)rvaVolumeInt);
 
                 headerSize -= 8;
             }
@@ -160,7 +162,7 @@ namespace ClHcaSharp
 
                 if (CommentLength > headerSize) throw new Exception("Comment string out of bounds.");
 
-                StringBuilder commentStringBuilder = new();
+                StringBuilder commentStringBuilder = new StringBuilder();
 
                 for (int i = 0; i < CommentLength; i++)
                 {
@@ -345,7 +347,7 @@ namespace ClHcaSharp
 
         private static bool IsHeaderValid(Stream hcaStream, out int headerSize)
         {
-            BitReader bitReader = new(new BinaryReader(hcaStream).ReadBytes(8));
+            BitReader bitReader = new BitReader(new BinaryReader(hcaStream).ReadBytes(8));
 
             headerSize = 0;
             if ((bitReader.Peek(32) & Mask) == StringToUInt32("HCA"))

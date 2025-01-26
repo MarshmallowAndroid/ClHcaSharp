@@ -6,7 +6,7 @@ namespace ClHcaSharp
     {
         public static T CreateJaggedArray<T>(params int[] lengths)
         {
-            Type? elementType = typeof(T).GetElementType();
+            Type elementType = typeof(T).GetElementType();
 
             if (elementType is null) throw new Exception("Type has no element type.");
 
@@ -16,9 +16,9 @@ namespace ClHcaSharp
         private static object InitJaggedArray(Type type, int[] lengths, int arrayIndex)
         {
             Array array = Array.CreateInstance(type, lengths[arrayIndex]);
-            Type? subElementType = type.GetElementType();
+            Type subElementType = type.GetElementType();
 
-            if (type.HasElementType && subElementType is not null)
+            if (type.HasElementType && subElementType != null)
             {
                 for (int i = 0; i < lengths[arrayIndex]; i++)
                 {

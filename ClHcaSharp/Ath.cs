@@ -52,12 +52,15 @@ namespace ClHcaSharp
 
         public static byte[] Init(int type, int sampleRate)
         {
-            return type switch
+            switch (type)
             {
-                0 => Init0(),
-                1 => Init1(sampleRate),
-                _ => throw new ArgumentException("Invalid ATH type."),
-            };
+                case 0:
+                    return Init0();
+                case 1:
+                    return Init1(sampleRate);
+                default:
+                    throw new ArgumentException("Invalid ATH type.");
+            }
         }
 
         private static byte[] Init0()
@@ -83,7 +86,7 @@ namespace ClHcaSharp
 
                 if (index >= 654)
                 {
-                    Array.Fill<byte>(athCurve, 0xFF, i, SamplesPerSubframe - i);
+                    Util.Fill<byte>(athCurve, 0xFF, i, SamplesPerSubframe - i);
                     break;
                 }
                 athCurve[i] = baseCurve[index];

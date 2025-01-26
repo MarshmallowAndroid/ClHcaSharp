@@ -26,7 +26,7 @@ namespace ClHcaSharp
 
         public const int DefaultRandom = 1;
 
-        public static readonly float MsStereoRatio = BitConverter.Int32BitsToSingle(0x3F3504F3);
+        public static readonly float MsStereoRatio = Util.UInt32ToSingle(0x3F3504F3);
     }
 
     public enum ChannelType
