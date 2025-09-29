@@ -287,8 +287,6 @@ namespace ClHcaSharp
             Random = DefaultRandom;
 
             if (MsStereo > 0) throw new Exception();
-            if (HfrGroupCount > 0 && Version == Version300)
-                throw new Exception();
         }
         
         public void SetKey(ulong key)
