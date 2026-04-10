@@ -25,7 +25,7 @@ namespace ClHcaSharp
                 case 56:
                     return Init56(keyCode);
                 default:
-                    throw new ArgumentException("Invalid cipher type.");
+                    throw new HcaHeaderException();
             }
         }
 

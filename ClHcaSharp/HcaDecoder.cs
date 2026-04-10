@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using static ClHcaSharp.Constants;
-//using static ClHcaSharp.Header;
 using static ClHcaSharp.Tables;
 
 namespace ClHcaSharp
@@ -42,8 +41,6 @@ namespace ClHcaSharp
 
         public int TestBlock(byte[] data)
         {
-            if (hca.Channels is null) return -1;
-
             const int frameSamples = Subframes * SamplesPerSubframe;
             const float scale = 32768.0F;
 
@@ -77,8 +74,7 @@ namespace ClHcaSharp
                 int byteStart;
 
                 if (status + 14 > bitsMax)
-                    return -1;
-                //throw new Exception("BitReader error.");
+                    throw new HcaBitReaderException();
 
                 byteStart = (status / 8) + (status % 8 > 0 ? 0x01 : 0);
 
@@ -183,25 +179,23 @@ namespace ClHcaSharp
             }
         }
 
-        public int DecodeBlock(byte[] data)
+        public void DecodeBlock(byte[] data)
         {
-            int result = DecodeBlockUnpack(data);
-            if (result < 0) return result;
+            DecodeBlockUnpack(data);
             DecodeBlockTransform();
-            return result;
         }
 
         private int DecodeBlockUnpack(byte[] data)
         {
             if (data.Length < hca.FrameSize)
-                throw new ArgumentException("Data is less than expected frame size.");
+                throw new HcaParamsException();
 
             BitReader bitReader = new BitReader(data);
 
             ushort sync = (ushort)bitReader.Read(16);
-            if (sync != 0xFFFF) throw new InvalidDataException("Sync error.");
+            if (sync != 0xFFFF) throw new HcaSyncException();
 
-            if (Crc.Crc16Checksum(data) > 0) throw new InvalidDataException("Checksum error.");
+            if (Crc.Crc16Checksum(data) > 0) throw new HcaSyncException();
 
             Cipher.Decrypt(hca.CipherTable, data);
 
@@ -272,8 +266,7 @@ namespace ClHcaSharp
                 csCount += extraCount;
 
                 if (csCount > SamplesPerSubframe)
-                    return;
-                //throw new InvalidDataException("Invalid scale count.");
+                    throw new HcaUnpackException();
             }
 
             if (deltaBits >= 6)
@@ -299,8 +292,7 @@ namespace ClHcaSharp
                     {
                         int scaleFactorTest = value + (delta - (expectedDelta >> 1));
                         if (scaleFactorTest < 0 || scaleFactorTest >= 64)
-                            return;
-                        //throw new InvalidDataException("Invalid scale factor.");
+                            throw new HcaUnpackException();
 
                         value = (byte)(value - (expectedDelta >> 1) + delta);
                         value = (byte)(value & 0x3F);
@@ -373,8 +365,7 @@ namespace ClHcaSharp
                                 {
                                     value = (byte)(value - (bMax >> 1) + delta);
                                     if (value > 15)
-                                        return;
-                                    //throw new InvalidDataException("Intensity value out of range.");
+                                        throw new HcaUnpackException();
                                 }
 
                                 channel.Intensity[i] = value;

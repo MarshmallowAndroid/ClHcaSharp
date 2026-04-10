@@ -10,12 +10,13 @@ namespace ClHcaSharp
         public HcaContext(Stream hcaStream)
         {
             if (!IsHeaderValid(hcaStream, out int headerSize))
-                throw new Exception("Invalid HCA header.");
+                throw new HcaHeaderException();
 
             BinaryReader binaryReader = new BinaryReader(hcaStream);
             binaryReader.BaseStream.Position = 0;
 
-            BitReader bitReader = new BitReader(binaryReader.ReadBytes(headerSize));
+            byte[] headerBytes = binaryReader.ReadBytes(headerSize);
+            BitReader bitReader = new BitReader(headerBytes);
 
             if ((bitReader.Peek(32) & Mask) == StringToUInt32("HCA"))
             {
@@ -23,9 +24,22 @@ namespace ClHcaSharp
                 Version = bitReader.Read(16);
                 HeaderSize = bitReader.Read(16);
 
+                if (Version != Version101 &&
+                    Version != Version102 &&
+                    Version != Version103 &&
+                    Version != Version200 &&
+                    Version != Version300)
+                    throw new HcaHeaderException();
+
+                if (headerSize < HeaderSize)
+                    throw new HcaParamsException();
+
+                if (Crc.Crc16Checksum(headerBytes) > 0)
+                    throw new HcaChecksumException();
+
                 headerSize -= 8;
             }
-            else throw new Exception("Not an HCA file.");
+            else throw new HcaHeaderException();
 
             if (headerSize >= 16 && (bitReader.Peek(32) & Mask) == StringToUInt32("fmt"))
             {
@@ -37,17 +51,17 @@ namespace ClHcaSharp
                 EncoderPadding = bitReader.Read(16);
 
                 if (!(ChannelCount >= MinChannels && ChannelCount <= MaxChannels))
-                    throw new Exception("Invalid channel count.");
+                    throw new HcaHeaderException();
 
                 if (FrameCount == 0)
-                    throw new Exception("Frame count is zero.");
+                    throw new HcaHeaderException();
 
                 if (!(SampleRate >= MinSampleRate && SampleRate <= MaxSampleRate))
-                    throw new Exception("Invalid sample rate.");
+                    throw new HcaHeaderException();
 
                 headerSize -= 16;
             }
-            else throw new Exception("No format chunk.");
+            else throw new HcaHeaderException();
 
             if (headerSize >= 16 && (bitReader.Peek(32) & Mask) == StringToUInt32("comp"))
             {
@@ -84,7 +98,7 @@ namespace ClHcaSharp
 
                 headerSize -= 12;
             }
-            else throw new Exception("No compression or decode chunk.");
+            else throw new HcaHeaderException();
 
             if (headerSize >= 8 && (bitReader.Peek(32) & Mask) == StringToUInt32("vbr"))
             {
@@ -93,7 +107,7 @@ namespace ClHcaSharp
                 VbrNoiseLevel = bitReader.Read(16);
 
                 if (!(FrameSize == 0 && VbrMaxFrameSize > 8 && VbrMaxFrameSize <= 511))
-                    throw new Exception("Invalid frame size.");
+                    throw new HcaHeaderException();
 
                 headerSize -= 8;
             }
@@ -122,7 +136,7 @@ namespace ClHcaSharp
 
                 if (!(LoopStartFrame >= 0 && LoopStartFrame <= LoopEndFrame
                     && LoopEndFrame < FrameCount))
-                    throw new Exception("Invalid loop frames.");
+                    throw new HcaHeaderException();
 
                 headerSize -= 16;
             }
@@ -141,7 +155,7 @@ namespace ClHcaSharp
                 CiphType = bitReader.Read(16);
 
                 if (!(CiphType == 0 || CiphType == 1 || CiphType == 56))
-                    throw new Exception("Invalid cipher type.");
+                    throw new HcaHeaderException();
                 headerSize -= 6;
             }
 
@@ -160,10 +174,9 @@ namespace ClHcaSharp
                 bitReader.Skip(32);
                 CommentLength = bitReader.Read(8);
 
-                if (CommentLength > headerSize) throw new Exception("Comment string out of bounds.");
+                if (CommentLength > headerSize) throw new HcaHeaderException();
 
                 StringBuilder commentStringBuilder = new StringBuilder();
-
                 for (int i = 0; i < CommentLength; i++)
                 {
                     commentStringBuilder.Append(bitReader.Read(8));
@@ -171,35 +184,38 @@ namespace ClHcaSharp
 
                 Comment = commentStringBuilder.ToString();
 
-                //headerSize -= 5 + CommentLength;
+                headerSize -= 5 + CommentLength;
             }
             else CommentLength = 0;
 
-            // IDE0059
-            //if (headerSize >= 4 && (bitReader.Peek(32) & Mask) == StringToUInt32("pad"))
-            //{
-            //    headerSize -= (headerSize - 2);
-            //}
+#pragma warning disable IDE0059 // Unnecessary assignment of a value
+            if (headerSize >= 4 && (bitReader.Peek(32) & Mask) == StringToUInt32("pad"))
+            {
+                headerSize -= (headerSize - 2);
+            }
+#pragma warning restore IDE0059 // Unnecessary assignment of a value
 
             if (FrameSize < MinFrameSize || FrameSize > MaxFrameSize)
-                throw new Exception("Invalid frame size.");
+                throw new HcaHeaderException();
 
             if (Version <= Version200)
             {
                 if (MinResolution != 1 || MaxResolution != 15)
-                    throw new Exception("Incompatible resolution.");
+                    throw new HcaHeaderException();
             }
+            else if (MinResolution > MaxResolution || MaxResolution > 15)
+                throw new HcaHeaderException();
 
             if (TrackCount == 0) TrackCount = 1;
 
-            if (TrackCount > ChannelCount) throw new Exception("Invalid track count.");
+            if (TrackCount > ChannelCount) throw new HcaHeaderException();
 
             if (TotalBandCount > SamplesPerSubframe ||
                 BaseBandCount > SamplesPerSubframe ||
                 StereoBandCount > SamplesPerSubframe ||
                 BaseBandCount + StereoBandCount > SamplesPerSubframe ||
                 BandsPerHfrGroup > SamplesPerSubframe)
-                throw new Exception("Invalid bands.");
+                throw new HcaHeaderException();
 
             HfrGroupCount = HeaderCeil2(
                 TotalBandCount - BaseBandCount - StereoBandCount,
@@ -286,7 +302,7 @@ namespace ClHcaSharp
 
             Random = DefaultRandom;
 
-            if (MsStereo > 0) throw new Exception();
+            if (MsStereo > 0) throw new HcaHeaderException();
         }
         
         public void SetKey(ulong key)
