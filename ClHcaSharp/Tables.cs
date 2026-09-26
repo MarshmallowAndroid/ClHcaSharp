@@ -15,7 +15,6 @@ namespace ClHcaSharp
     {
         private static bool initialized = false;
 
-
         public static void InitializeTables()
         {
             if (initialized) return;

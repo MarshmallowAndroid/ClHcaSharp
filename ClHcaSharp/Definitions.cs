@@ -9,7 +9,7 @@
  * 
  */
 
-﻿using System;
+using System;
 
 namespace ClHcaSharp
 {

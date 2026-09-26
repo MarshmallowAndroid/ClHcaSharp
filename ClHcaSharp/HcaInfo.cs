@@ -9,7 +9,7 @@
  * 
  */
 
-﻿namespace ClHcaSharp
+namespace ClHcaSharp
 {
     public class HcaInfo
     {

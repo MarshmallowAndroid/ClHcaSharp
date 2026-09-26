@@ -9,7 +9,7 @@
  * 
  */
 
-﻿using static ClHcaSharp.Constants;
+using static ClHcaSharp.Constants;
 
 namespace ClHcaSharp
 {

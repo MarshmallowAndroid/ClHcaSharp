@@ -63,9 +63,9 @@ namespace ClHcaSharp
             }
 
             int bitOffset = bits + bitsRemaining;
-            int bitLeft = size - bit;
+            int bitsLeft = size - bit;
 
-            if (bitLeft >= 32 && bitOffset >= 25)
+            if (bitsLeft >= 32 && bitOffset >= 25)
             {
                 int dataOffset = bit >> 3;
                 value = data[dataOffset];
@@ -75,7 +75,7 @@ namespace ClHcaSharp
                 value &= mask32[bitsRemaining];
                 value >>= 32 - bitsRemaining - bits;
             }
-            else if (bitLeft >= 24 && bitOffset >= 17)
+            else if (bitsLeft >= 24 && bitOffset >= 17)
             {
                 int dataOffset = bit >> 3;
                 value = data[dataOffset];
@@ -84,7 +84,7 @@ namespace ClHcaSharp
                 value &= mask24[bitsRemaining];
                 value >>= 24 - bitsRemaining - bits;
             }
-            else if (bitLeft >= 16 && bitOffset >= 9)
+            else if (bitsLeft >= 16 && bitOffset >= 9)
             {
                 int dataOffset = bit >> 3;
                 value = data[dataOffset];

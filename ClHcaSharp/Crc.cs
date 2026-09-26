@@ -9,7 +9,7 @@
  * 
  */
 
-﻿namespace ClHcaSharp
+namespace ClHcaSharp
 {
     internal static class Crc
     {

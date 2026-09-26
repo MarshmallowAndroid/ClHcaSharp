@@ -9,7 +9,6 @@
  * 
  */
 
-﻿using System;
 using static ClHcaSharp.Constants;
 
 namespace ClHcaSharp
@@ -70,7 +69,7 @@ namespace ClHcaSharp
                 case 1:
                     return Init1(sampleRate);
                 default:
-                    throw new ArgumentException("Invalid ATH type.");
+                    throw new HcaHeaderException();
             }
         }
 
