@@ -32,12 +32,15 @@ namespace ClHcaSharp
 
         public const int MinChannels = 1;
         public const int MaxChannels = 16;
+
+        public const int ChannelConfigFlagAmbisonics = 0x80;
+
         public const int MinSampleRate = 1;
         public const int MaxSampleRate = 0x7FFFFF;
 
         public const int DefaultRandom = 1;
 
-        public static readonly float MsStereoRatio = Util.UInt32ToSingle(0x3F3504F3);
+        public static readonly float MsStereoRatio = (float)(1 / Math.Sqrt(2));
     }
 
     public enum ChannelType

@@ -33,5 +33,7 @@ namespace ClHcaSharp
         public int SampleCount => BlockCount * SamplesPerBlock - EncoderDelay - EncoderPadding;
         public int LoopStartSample => LoopStartBlock * SamplesPerBlock - EncoderDelay + LoopStartDelay;
         public int LoopEndSample => LoopEndBlock * SamplesPerBlock - EncoderDelay + (SamplesPerBlock - LoopEndPadding);
+
+        public bool Ambisonics { get; set; }
     }
 }

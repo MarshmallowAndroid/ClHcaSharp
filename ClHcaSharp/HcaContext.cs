@@ -22,10 +22,11 @@ namespace ClHcaSharp
             if (!IsHeaderValid(hcaStream, out int headerSize))
                 throw new HcaHeaderException();
 
-            BinaryReader binaryReader = new BinaryReader(hcaStream);
-            binaryReader.BaseStream.Position = 0;
+            hcaStream.Position = 0;
 
-            byte[] headerBytes = binaryReader.ReadBytes(headerSize);
+            byte[] headerBytes = new byte[headerSize];
+            hcaStream.Read(headerBytes, 0, headerSize);
+
             BitReader bitReader = new BitReader(headerBytes);
 
             if ((bitReader.Peek(32) & Mask) == StringToUInt32("HCA"))
@@ -205,7 +206,7 @@ namespace ClHcaSharp
             }
 #pragma warning restore IDE0059 // Unnecessary assignment of a value
 
-            if (FrameSize < MinFrameSize || FrameSize > MaxFrameSize)
+            if (!(FrameSize >= MinFrameSize && FrameSize <= MaxFrameSize))
                 throw new HcaHeaderException();
 
             if (Version <= Version200)
@@ -220,10 +221,10 @@ namespace ClHcaSharp
 
             if (TrackCount > ChannelCount) throw new HcaHeaderException();
 
-            if (TotalBandCount > SamplesPerSubframe ||
-                BaseBandCount > SamplesPerSubframe ||
-                StereoBandCount > SamplesPerSubframe ||
-                BaseBandCount + StereoBandCount > SamplesPerSubframe ||
+            if (TotalBandCount > SamplesPerSubframe || TotalBandCount == 0 ||
+                BaseBandCount + StereoBandCount > TotalBandCount ||
+                BaseBandCount + StereoBandCount == 0 ||
+                StereoBandCount > BaseBandCount ||
                 BandsPerHfrGroup > SamplesPerSubframe)
                 throw new HcaHeaderException();
 
@@ -231,94 +232,31 @@ namespace ClHcaSharp
                 TotalBandCount - BaseBandCount - StereoBandCount,
                 BandsPerHfrGroup);
 
-            AthCurve = Ath.Init(AthType, SampleRate);
-            CipherTable = Cipher.Init(CiphType, KeyCode);
-
-            int channelsPerTrack = ChannelCount / TrackCount;
             ChannelType[] channelTypes = new ChannelType[MaxChannels];
-
-            for (int i = 0; i < channelTypes.Length; i++)
-            {
-                channelTypes[i] = ChannelType.Discrete;
-            }
-
-            if (StereoBandCount > 0 && channelsPerTrack > 1)
-            {
-                for (int i = 0; i < TrackCount; i++)
-                {
-                    switch (channelsPerTrack)
-                    {
-                        case 2:
-                        case 3:
-                            channelTypes[0] = ChannelType.StereoPrimary;
-                            channelTypes[1] = ChannelType.StereoSecondary;
-                            break;
-
-                        case 4:
-                            channelTypes[0] = ChannelType.StereoPrimary;
-                            channelTypes[1] = ChannelType.StereoSecondary;
-                            if (ChannelConfig == 0)
-                            {
-                                channelTypes[2] = ChannelType.StereoPrimary;
-                                channelTypes[3] = ChannelType.StereoSecondary;
-                            }
-                            break;
-
-                        case 5:
-                            channelTypes[0] = ChannelType.StereoPrimary;
-                            channelTypes[1] = ChannelType.StereoSecondary;
-                            if (ChannelConfig <= 2)
-                            {
-                                channelTypes[3] = ChannelType.StereoPrimary;
-                                channelTypes[4] = ChannelType.StereoSecondary;
-                            }
-                            break;
-
-                        case 6:
-                        case 7:
-                            channelTypes[0] = ChannelType.StereoPrimary;
-                            channelTypes[1] = ChannelType.StereoSecondary;
-                            channelTypes[4] = ChannelType.StereoPrimary;
-                            channelTypes[5] = ChannelType.StereoSecondary;
-                            break;
-
-                        case 8:
-                            channelTypes[0] = ChannelType.StereoPrimary;
-                            channelTypes[1] = ChannelType.StereoSecondary;
-                            channelTypes[4] = ChannelType.StereoPrimary;
-                            channelTypes[5] = ChannelType.StereoSecondary;
-                            channelTypes[6] = ChannelType.StereoPrimary;
-                            channelTypes[7] = ChannelType.StereoSecondary;
-                            break;
-
-                        default:
-                            break;
-                    }
-                }
-            }
-
-            Channels = new Channel[ChannelCount];
+            SetupChannelTypes(ChannelCount, TrackCount, ChannelConfig, StereoBandCount, channelTypes);
+            
             for (int i = 0; i < ChannelCount; i++)
             {
+                int channelStereoBandCount;
+
+                if (channelTypes[i] == ChannelType.StereoSecondary)
+                    channelStereoBandCount = 0;
+                else
+                    channelStereoBandCount = StereoBandCount;
+
                 Channels[i] = new Channel
                 {
-                    Type = channelTypes[i],
-                    CodedCount =
-                    channelTypes[i] != ChannelType.StereoSecondary ?
-                    BaseBandCount + StereoBandCount :
-                    BaseBandCount
+                    CodedCount = BaseBandCount + channelStereoBandCount,
+                    Type = channelTypes[i]
                 };
             }
 
             Random = DefaultRandom;
 
-            if (MsStereo > 0) throw new HcaHeaderException();
-        }
-        
-        public void SetKey(ulong key)
-        {
-            KeyCode = key;
+            AthCurve = Ath.Init(AthType, SampleRate);
             CipherTable = Cipher.Init(CiphType, KeyCode);
+
+            if (MsStereo > 0) throw new HcaHeaderException();
         }
 
         public int Version { get; set; }
@@ -366,8 +304,105 @@ namespace ClHcaSharp
         public byte[] AthCurve { get; set; }
         public byte[] CipherTable { get; set; }
 
-        public int Random { get; set; }
-        public Channel[] Channels { get; set; }
+        public uint Random { get; set; }
+        public Channel[] Channels { get; set; } = new Channel[MaxChannels];
+
+        public void SetKey(ulong key)
+        {
+            KeyCode = key;
+            CipherTable = Cipher.Init(CiphType, KeyCode);
+        }
+
+        private static void SetupChannelTypes(int channels, int trackCount, int channelConfig, int stereoBandCount, ChannelType[] channelTypes)
+        {
+            int channelsPerTrack = channels / trackCount;
+            if (stereoBandCount > 0 && channelsPerTrack > 1)
+            {
+                int channelTypesOffset = 0;
+                for (int i = 0; i < trackCount; i++)
+                {
+                    switch (channelsPerTrack)
+                    {
+                        case 2:
+                            channelTypes[channelTypesOffset + 0] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 1] = ChannelType.StereoSecondary;
+                            break;
+                        case 3:
+                            channelTypes[channelTypesOffset + 0] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 1] = ChannelType.StereoSecondary;
+                            channelTypes[channelTypesOffset + 2] = ChannelType.Discrete;
+                            break;
+                        case 4:
+                            channelTypes[channelTypesOffset + 0] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 1] = ChannelType.StereoSecondary;
+                            if (channelConfig == 0)
+                            {
+                                channelTypes[channelTypesOffset + 2] = ChannelType.StereoPrimary;
+                                channelTypes[channelTypesOffset + 3] = ChannelType.StereoSecondary;
+                            }
+                            else
+                            {
+                                channelTypes[channelTypesOffset + 2] = ChannelType.Discrete;
+                                channelTypes[channelTypesOffset + 3] = ChannelType.Discrete;
+                            }
+                            break;
+                        case 5:
+                            channelTypes[channelTypesOffset + 0] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 1] = ChannelType.StereoSecondary;
+                            if (channelConfig <= 2)
+                            {
+                                channelTypes[channelTypesOffset + 3] = ChannelType.StereoPrimary;
+                                channelTypes[channelTypesOffset + 4] = ChannelType.StereoSecondary;
+                            }
+                            else
+                            {
+                                channelTypes[channelTypesOffset + 3] = ChannelType.Discrete;
+                                channelTypes[channelTypesOffset + 4] = ChannelType.Discrete;
+                            }
+                            break;
+
+                        case 6:
+                            channelTypes[channelTypesOffset + 0] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 1] = ChannelType.StereoSecondary;
+                            channelTypes[channelTypesOffset + 2] = ChannelType.Discrete;
+                            channelTypes[channelTypesOffset + 3] = ChannelType.Discrete;
+                            channelTypes[channelTypesOffset + 4] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 5] = ChannelType.StereoSecondary;
+                            break;
+                        case 7:
+                            channelTypes[channelTypesOffset + 0] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 1] = ChannelType.StereoSecondary;
+                            channelTypes[channelTypesOffset + 2] = ChannelType.Discrete;
+                            channelTypes[channelTypesOffset + 3] = ChannelType.Discrete;
+                            channelTypes[channelTypesOffset + 4] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 5] = ChannelType.StereoSecondary;
+                            channelTypes[channelTypesOffset + 6] = ChannelType.Discrete;
+                            break;
+
+                        case 8:
+                            channelTypes[channelTypesOffset + 0] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 1] = ChannelType.StereoSecondary;
+                            channelTypes[channelTypesOffset + 2] = ChannelType.Discrete;
+                            channelTypes[channelTypesOffset + 3] = ChannelType.Discrete;
+                            channelTypes[channelTypesOffset + 4] = ChannelType.StereoPrimary;
+                            channelTypes[channelTypesOffset + 5] = ChannelType.StereoSecondary;
+                            channelTypes[channelTypesOffset + 6] = ChannelType.Discrete;
+                            channelTypes[channelTypesOffset + 7] = ChannelType.Discrete;
+                            break;
+
+                        default:
+
+                            for (int ch = 0; ch < channelsPerTrack; ch++)
+                            {
+                                channelTypes[channelTypesOffset + ch] = ChannelType.Discrete;
+                            }
+                            break;
+                    }
+
+                    channelTypesOffset += channelsPerTrack;
+                }
+            }
+        }
 
         private static bool IsHeaderValid(Stream hcaStream, out int headerSize)
         {
