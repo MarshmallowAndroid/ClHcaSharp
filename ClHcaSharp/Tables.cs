@@ -1,5 +1,13 @@
-﻿using System;
-using System.Data;
+﻿/**
+ * Copyright (c) 2008-2025 Adam Gashlin, Fastelbja, Ronny Elfert, bnnm,
+ *                         Christopher Snowhill, NicknineTheEagle, bxaimc,
+ *                         Thealexbarney, CyberBotX, EdnessP, et al 
+ * 
+ * Portions of this code taken from vgmstream (https://github.com/vgmstream/vgmstream)
+ * 
+ * src/coding/libs/clhca_data.h
+ * 
+ */
 
 namespace ClHcaSharp
 {

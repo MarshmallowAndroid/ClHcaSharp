@@ -1,3 +1,14 @@
+﻿/**
+ * Copyright (c) 2008-2025 Adam Gashlin, Fastelbja, Ronny Elfert, bnnm,
+ *                         Christopher Snowhill, NicknineTheEagle, bxaimc,
+ *                         Thealexbarney, CyberBotX, EdnessP, et al 
+ * 
+ * Portions of this code taken from vgmstream (https://github.com/vgmstream/vgmstream)
+ * 
+ * src/coding/libs/clhca.c
+ * 
+ */
+
 ﻿using System;
 
 namespace ClHcaSharp

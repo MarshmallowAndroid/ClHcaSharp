@@ -1,4 +1,15 @@
-﻿using System;
+﻿/**
+ * Copyright (c) 2008-2025 Adam Gashlin, Fastelbja, Ronny Elfert, bnnm,
+ *                         Christopher Snowhill, NicknineTheEagle, bxaimc,
+ *                         Thealexbarney, CyberBotX, EdnessP, et al 
+ * 
+ * Portions of this code taken from vgmstream (https://github.com/vgmstream/vgmstream)
+ * 
+ * src/coding/hca_decoder.c
+ * 
+ */
+
+using System;
 using System.IO;
 using static ClHcaSharp.Constants;
 using static ClHcaSharp.Tables;

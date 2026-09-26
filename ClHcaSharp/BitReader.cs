@@ -1,4 +1,15 @@
-﻿namespace ClHcaSharp
+﻿/**
+ * Copyright (c) 2008-2025 Adam Gashlin, Fastelbja, Ronny Elfert, bnnm,
+ *                         Christopher Snowhill, NicknineTheEagle, bxaimc,
+ *                         Thealexbarney, CyberBotX, EdnessP, et al 
+ * 
+ * Portions of this code taken from vgmstream (https://github.com/vgmstream/vgmstream)
+ * 
+ * src/coding/hca_decoder.c
+ * 
+ */
+
+namespace ClHcaSharp
 {
     internal class BitReader
     {
